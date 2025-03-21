@@ -408,14 +408,17 @@
         min-height: 300px;
         border: 1px solid #dfe6e9;
         border-radius: 4px;
-        padding: 1rem;
+        padding: 0.5rem;
         background-color: #f9f9f9;
+        overflow: hidden;
       }
 
       #svg-preview-container svg {
         max-width: 100%;
         max-height: 60vh;
         background-color: white;
+        display: block;
+        margin: 0 auto;
       }
 
       .tool-groups {
@@ -720,7 +723,11 @@
             </div>
 
             <div class="header-menu">
-              <button id="load-example" class="btn btn-dark btn-sm">
+              <button
+                id="load-example"
+                class="btn btn-dark btn-sm"
+                style="width: auto"
+              >
                 <i class="fas fa-lightbulb"></i> Load Example
               </button>
 
@@ -1209,11 +1216,37 @@
           // Pfade für die Außenkanten aller gefüllten Zellen erstellen
           const paths = generateOutlinePaths();
 
-          // SVG erstellen
-          const svgWidth = gridWidth * cellSize;
-          const svgHeight = gridHeight * cellSize;
+          // Bounding box berechnen
+          let minX = gridWidth * cellSize;
+          let minY = gridHeight * cellSize;
+          let maxX = 0;
+          let maxY = 0;
 
-          let svgContent = `<svg width="${svgWidth}" height="${svgHeight}" xmlns="http://www.w3.org/2000/svg">`;
+          // Durch alle gefüllten Zellen iterieren, um die tatsächlichen Grenzen zu finden
+          for (let y = 0; y < gridHeight; y++) {
+            for (let x = 0; x < gridWidth; x++) {
+              if (grid[y][x]) {
+                minX = Math.min(minX, x * cellSize);
+                minY = Math.min(minY, y * cellSize);
+                maxX = Math.max(maxX, (x + 1) * cellSize);
+                maxY = Math.max(maxY, (y + 1) * cellSize);
+              }
+            }
+          }
+
+          // Padding hinzufügen (5px auf jeder Seite)
+          const padding = 5;
+          minX = Math.max(0, minX - padding);
+          minY = Math.max(0, minY - padding);
+          maxX = Math.min(gridWidth * cellSize, maxX + padding);
+          maxY = Math.min(gridHeight * cellSize, maxY + padding);
+
+          // SVG-Dimensionen berechnen
+          const svgWidth = maxX - minX;
+          const svgHeight = maxY - minY;
+
+          // SVG erstellen mit viewBox, um den Inhalt zu zentrieren
+          let svgContent = `<svg width="${svgWidth}" height="${svgHeight}" viewBox="${minX} ${minY} ${svgWidth} ${svgHeight}" xmlns="http://www.w3.org/2000/svg">`;
 
           // Pfade mit roter Kontur und ohne Füllung
           paths.forEach((path) => {
@@ -1231,11 +1264,37 @@
           // Pfade für die Außenkanten aller gefüllten Zellen erstellen
           const paths = generateOutlinePaths();
 
-          // SVG erstellen
-          const svgWidth = gridWidth * cellSize;
-          const svgHeight = gridHeight * cellSize;
+          // Bounding box berechnen
+          let minX = gridWidth * cellSize;
+          let minY = gridHeight * cellSize;
+          let maxX = 0;
+          let maxY = 0;
 
-          let svgContent = `<svg width="${svgWidth}" height="${svgHeight}" xmlns="http://www.w3.org/2000/svg">`;
+          // Durch alle gefüllten Zellen iterieren, um die tatsächlichen Grenzen zu finden
+          for (let y = 0; y < gridHeight; y++) {
+            for (let x = 0; x < gridWidth; x++) {
+              if (grid[y][x]) {
+                minX = Math.min(minX, x * cellSize);
+                minY = Math.min(minY, y * cellSize);
+                maxX = Math.max(maxX, (x + 1) * cellSize);
+                maxY = Math.max(maxY, (y + 1) * cellSize);
+              }
+            }
+          }
+
+          // Padding hinzufügen (5px auf jeder Seite)
+          const padding = 5;
+          minX = Math.max(0, minX - padding);
+          minY = Math.max(0, minY - padding);
+          maxX = Math.min(gridWidth * cellSize, maxX + padding);
+          maxY = Math.min(gridHeight * cellSize, maxY + padding);
+
+          // SVG-Dimensionen berechnen
+          const svgWidth = maxX - minX;
+          const svgHeight = maxY - minY;
+
+          // SVG erstellen mit viewBox, um den Inhalt zu zentrieren
+          let svgContent = `<svg width="${svgWidth}" height="${svgHeight}" viewBox="${minX} ${minY} ${svgWidth} ${svgHeight}" xmlns="http://www.w3.org/2000/svg">`;
 
           // Pfade mit roter Kontur und ohne Füllung
           paths.forEach((path) => {
