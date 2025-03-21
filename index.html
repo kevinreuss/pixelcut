@@ -118,6 +118,36 @@
         margin-bottom: 0.5rem;
         border-bottom: 1px solid #dfe6e9;
         padding-bottom: 0.5rem;
+        cursor: pointer;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .section-title::after {
+        content: "\f077";
+        font-family: "Font Awesome 5 Free";
+        font-weight: 900;
+        font-size: 0.8rem;
+        transition: transform 0.3s ease;
+      }
+
+      .section-title.collapsed::after {
+        transform: rotate(180deg);
+      }
+
+      .section-content {
+        transition: max-height 0.3s ease, opacity 0.3s ease,
+          margin-top 0.3s ease;
+        max-height: 1000px;
+        opacity: 1;
+        overflow: hidden;
+      }
+
+      .section-content.collapsed {
+        max-height: 0;
+        opacity: 0;
+        margin-top: 0;
       }
 
       .tool-buttons {
@@ -455,135 +485,143 @@
         <div class="tools-panel">
           <div class="tools-section">
             <div class="section-title">Keep Updated</div>
-            <form
-              action="https://formspree.io/f/xaneeblg"
-              method="POST"
-              class="newsletter-form"
-            >
-              <div class="setting-group">
-                <div class="setting-label">Your E-Mail:</div>
-                <input
-                  type="email"
-                  name="email"
-                  placeholder="email@example.com"
-                  required
-                  style="
-                    width: 100%;
-                    padding: 0.5rem;
-                    border: 1px solid #dfe6e9;
-                    border-radius: 4px;
-                    font-size: 0.9rem;
-                    margin-bottom: 0.5rem;
-                  "
-                />
-              </div>
-              <div class="setting-group">
-                <div class="setting-label">Message (optional):</div>
-                <textarea
-                  name="message"
-                  rows="2"
-                  placeholder="I want to receive updates..."
-                  style="
-                    width: 100%;
-                    padding: 0.5rem;
-                    border: 1px solid #dfe6e9;
-                    border-radius: 4px;
-                    font-size: 0.9rem;
-                    resize: vertical;
-                    margin-bottom: 0.5rem;
-                  "
-                ></textarea>
-              </div>
-              <button type="submit" class="btn btn-primary">
-                <i class="fas fa-paper-plane"></i> Subscribe
-              </button>
-            </form>
+            <div class="section-content">
+              <form
+                action="https://formspree.io/f/xaneeblg"
+                method="POST"
+                class="newsletter-form"
+              >
+                <div class="setting-group">
+                  <div class="setting-label">Your E-Mail:</div>
+                  <input
+                    type="email"
+                    name="email"
+                    placeholder="email@example.com"
+                    required
+                    style="
+                      width: 100%;
+                      padding: 0.5rem;
+                      border: 1px solid #dfe6e9;
+                      border-radius: 4px;
+                      font-size: 0.9rem;
+                      margin-bottom: 0.5rem;
+                    "
+                  />
+                </div>
+                <div class="setting-group">
+                  <div class="setting-label">Message (optional):</div>
+                  <textarea
+                    name="message"
+                    rows="2"
+                    placeholder="I want to receive updates..."
+                    style="
+                      width: 100%;
+                      padding: 0.5rem;
+                      border: 1px solid #dfe6e9;
+                      border-radius: 4px;
+                      font-size: 0.9rem;
+                      resize: vertical;
+                      margin-bottom: 0.5rem;
+                    "
+                  ></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">
+                  <i class="fas fa-paper-plane"></i> Subscribe
+                </button>
+              </form>
+            </div>
           </div>
 
           <div class="tools-section">
             <div class="section-title">Grid Settings</div>
-            <div class="grid-settings">
-              <div class="setting-group">
-                <div class="setting-label">Grid Size</div>
-                <div class="setting-input">
-                  <input
-                    type="number"
-                    id="grid-width"
-                    min="1"
-                    max="100"
-                    value="20"
-                  />
-                  x
-                  <input
-                    type="number"
-                    id="grid-height"
-                    min="1"
-                    max="100"
-                    value="20"
-                  />
+            <div class="section-content">
+              <div class="grid-settings">
+                <div class="setting-group">
+                  <div class="setting-label">Grid Size</div>
+                  <div class="setting-input">
+                    <input
+                      type="number"
+                      id="grid-width"
+                      min="1"
+                      max="100"
+                      value="20"
+                    />
+                    x
+                    <input
+                      type="number"
+                      id="grid-height"
+                      min="1"
+                      max="100"
+                      value="20"
+                    />
+                  </div>
                 </div>
-              </div>
 
-              <div class="setting-group">
-                <div class="setting-label">Cell Size (px)</div>
-                <div class="setting-input">
-                  <input
-                    type="number"
-                    id="cell-size"
-                    min="10"
-                    max="100"
-                    value="30"
-                  />
+                <div class="setting-group">
+                  <div class="setting-label">Cell Size (px)</div>
+                  <div class="setting-input">
+                    <input
+                      type="number"
+                      id="cell-size"
+                      min="10"
+                      max="100"
+                      value="30"
+                    />
+                  </div>
                 </div>
-              </div>
 
-              <button id="apply-grid" class="btn btn-primary">
-                <i class="fas fa-sync-alt"></i> Apply Grid
-              </button>
+                <button id="apply-grid" class="btn btn-primary">
+                  <i class="fas fa-sync-alt"></i> Apply Grid
+                </button>
+              </div>
             </div>
           </div>
 
           <div class="tools-section">
             <div class="section-title">Save/Load</div>
-            <button
-              id="load-example"
-              class="btn btn-dark"
-              style="margin-top: 0.5rem"
-            >
-              <i class="fas fa-lightbulb"></i> Load Example
-            </button>
-            <button id="download-json" class="btn btn-dark">
-              <i class="fas fa-download"></i> Download State
-            </button>
-            <div>
-              <label
-                for="upload-json"
+            <div class="section-content">
+              <button
+                id="load-example"
                 class="btn btn-dark"
-                style="cursor: pointer; width: 100%; box-sizing: border-box"
+                style="margin-top: 0.5rem"
               >
-                <i class="fas fa-upload"></i> Upload State
-              </label>
-              <input
-                type="file"
-                id="upload-json"
-                accept=".json"
-                style="display: none"
-              />
+                <i class="fas fa-lightbulb"></i> Load Example
+              </button>
+              <button id="download-json" class="btn btn-dark">
+                <i class="fas fa-download"></i> Download State
+              </button>
+              <div style="margin-top: 0.5rem">
+                <label
+                  for="upload-json"
+                  class="btn btn-dark"
+                  style="cursor: pointer; width: 100%; box-sizing: border-box"
+                >
+                  <i class="fas fa-upload"></i> Upload State
+                </label>
+                <input
+                  type="file"
+                  id="upload-json"
+                  accept=".json"
+                  style="display: none"
+                />
+              </div>
             </div>
           </div>
 
           <div class="tools-section">
             <div class="section-title">Export</div>
-            <button
-              id="preview-svg"
-              class="btn btn-success"
-              style="margin-bottom: 0.5rem"
-            >
-              <i class="fas fa-eye"></i> Preview SVG
-            </button>
-            <button id="export-svg" class="btn btn-success">
-              <i class="fas fa-file-export"></i> Export as SVG
-            </button>
+            <div class="section-content">
+              <button
+                id="preview-svg"
+                class="btn btn-success"
+                style="margin-bottom: 0.5rem"
+              >
+                <i class="fas fa-eye"></i> Preview SVG
+              </button>
+              <button id="export-svg" class="btn btn-success">
+                <i class="fas fa-file-export"></i> Export as SVG
+              </button>
+            </div>
           </div>
         </div>
 
@@ -677,6 +715,54 @@
     <script src="examples.js"></script>
     <script>
       document.addEventListener("DOMContentLoaded", function () {
+        // Add collapsible functionality to section titles
+        const sectionTitles = document.querySelectorAll(".section-title");
+
+        sectionTitles.forEach((title) => {
+          title.addEventListener("click", function () {
+            // Toggle collapsed class on title
+            this.classList.toggle("collapsed");
+
+            // Toggle collapsed class on the content
+            const content = this.nextElementSibling;
+            content.classList.toggle("collapsed");
+
+            // Save state to localStorage
+            saveMenuState();
+          });
+        });
+
+        // Load menu state from localStorage
+        function loadMenuState() {
+          const savedState = localStorage.getItem("pixelcutMenuState");
+
+          if (savedState) {
+            const collapsedSections = JSON.parse(savedState);
+
+            sectionTitles.forEach((title, index) => {
+              if (collapsedSections[index]) {
+                title.classList.add("collapsed");
+                title.nextElementSibling.classList.add("collapsed");
+              }
+            });
+          }
+        }
+
+        // Save menu state to localStorage
+        function saveMenuState() {
+          const collapsedState = Array.from(sectionTitles).map((title) =>
+            title.classList.contains("collapsed")
+          );
+
+          localStorage.setItem(
+            "pixelcutMenuState",
+            JSON.stringify(collapsedState)
+          );
+        }
+
+        // Load menu state on page load
+        loadMenuState();
+
         // Canvas und Kontext
         const canvas = document.getElementById("grid-canvas");
         const ctx = canvas.getContext("2d");
