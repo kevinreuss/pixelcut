@@ -617,18 +617,52 @@
 
         // Grid initialisieren
         function initGrid() {
-          gridWidth = parseInt(document.getElementById("grid-width").value);
-          gridHeight = parseInt(document.getElementById("grid-height").value);
-          cellSize = parseInt(document.getElementById("cell-size").value);
+          const newGridWidth = parseInt(
+            document.getElementById("grid-width").value
+          );
+          const newGridHeight = parseInt(
+            document.getElementById("grid-height").value
+          );
+          const newCellSize = parseInt(
+            document.getElementById("cell-size").value
+          );
+
+          // Altes Grid speichern
+          const oldGrid = grid;
+          const oldGridWidth = gridWidth;
+          const oldGridHeight = gridHeight;
+          const oldCellSize = cellSize;
+
+          // Neue Werte übernehmen
+          gridWidth = newGridWidth;
+          gridHeight = newGridHeight;
+          cellSize = newCellSize;
 
           // Canvas-Größe anpassen
           canvas.width = gridWidth * cellSize;
           canvas.height = gridHeight * cellSize;
 
-          // Grid-Array initialisieren (false = kein Material)
-          grid = Array(gridHeight)
+          // Neues Grid erstellen
+          const newGrid = Array(gridHeight)
             .fill()
             .map(() => Array(gridWidth).fill(false));
+
+          // Vorhandene Zeichnung übernehmen
+          if (oldGrid.length > 0) {
+            // Gemeinsame Höhe und Breite bestimmen (kleinerer Wert)
+            const commonHeight = Math.min(oldGridHeight, gridHeight);
+            const commonWidth = Math.min(oldGridWidth, gridWidth);
+
+            // Daten übertragen
+            for (let y = 0; y < commonHeight; y++) {
+              for (let x = 0; x < commonWidth; x++) {
+                newGrid[y][x] = oldGrid[y][x];
+              }
+            }
+          }
+
+          // Neues Grid übernehmen
+          grid = newGrid;
 
           // Grid zeichnen
           drawGrid();
