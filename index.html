@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="de">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PixelCut - Einfache Designs für deinen Lasercutter</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <style>
+      :root {
+        --primary: #3498db;
+        --primary-dark: #2980b9;
+        --secondary: #e74c3c;
+        --light: #ecf0f1;
+        --dark: #2c3e50;
+        --success: #2ecc71;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      }
+
+      body {
+        background-color: #f9f9f9;
+        color: var(--dark);
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+
+      header {
+        background-color: white;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        padding: 1rem;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+      }
+
+      .container {
+        width: 100%;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 1rem;
+      }
+
+      .header-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .logo {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-weight: bold;
+        font-size: 1.5rem;
+        color: var(--primary);
+      }
+
+      .logo i {
+        font-size: 1.8rem;
+      }
+
+      main {
+        flex: 1;
+        padding: 2rem 0;
+      }
+
+      .editor-container {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+      }
+
+      @media (min-width: 768px) {
+        .editor-container {
+          flex-direction: row;
+        }
+      }
+
+      .tools-panel {
+        background-color: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        padding: 1.5rem;
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+      }
+
+      @media (min-width: 768px) {
+        .tools-panel {
+          width: 300px;
+        }
+      }
+
+      .tools-section {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+      }
+
+      .section-title {
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--dark);
+        margin-bottom: 0.5rem;
+      }
+
+      .tool-buttons {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+      }
+
+      .tool-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 48px;
+        height: 48px;
+        border-radius: 8px;
+        background-color: var(--light);
+        border: 2px solid transparent;
+        cursor: pointer;
+        transition: all 0.2s;
+        font-size: 1.2rem;
+      }
+
+      .tool-btn:hover {
+        background-color: #dfe6e9;
+      }
+
+      .tool-btn.active {
+        border-color: var(--primary);
+        background-color: rgba(52, 152, 219, 0.1);
+        color: var(--primary);
+      }
+
+      .grid-settings {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+      }
+
+      .setting-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+
+      .setting-label {
+        font-size: 0.9rem;
+        color: #7f8c8d;
+      }
+
+      .setting-input {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      input[type="number"] {
+        width: 80px;
+        padding: 0.5rem;
+        border: 1px solid #dfe6e9;
+        border-radius: 4px;
+        font-size: 0.9rem;
+      }
+
+      .btn {
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: 6px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .btn-primary {
+        background-color: var(--primary);
+        color: white;
+      }
+
+      .btn-primary:hover {
+        background-color: var(--primary-dark);
+      }
+
+      .btn-success {
+        background-color: var(--success);
+        color: white;
+      }
+
+      .btn-success:hover {
+        background-color: #27ae60;
+      }
+
+      .canvas-container {
+        flex: 1;
+        background-color: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        padding: 1.5rem;
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        overflow: hidden;
+      }
+
+      .canvas-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .canvas-title {
+        font-size: 1.2rem;
+        font-weight: 600;
+      }
+
+      #canvas-wrapper {
+        flex: 1;
+        overflow: auto;
+        border: 1px solid #dfe6e9;
+        border-radius: 4px;
+        position: relative;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 400px;
+      }
+
+      canvas {
+        background-color: white;
+      }
+
+      footer {
+        background-color: white;
+        padding: 1.5rem 0;
+        text-align: center;
+        color: #7f8c8d;
+        font-size: 0.9rem;
+        margin-top: 2rem;
+        box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+      }
+
+      .mobile-warning {
+        display: none;
+        background-color: rgba(231, 76, 60, 0.1);
+        color: var(--secondary);
+        padding: 0.75rem;
+        border-radius: 6px;
+        margin-bottom: 1rem;
+        text-align: center;
+      }
+
+      @media (max-width: 767px) {
+        .mobile-warning {
+          display: block;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="container">
+        <div class="header-content">
+          <div class="logo">
+            <i class="fas fa-cut"></i>
+            <span>PixelCut</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="container">
+      <div class="mobile-warning">
+        <i class="fas fa-mobile-alt"></i> Für die beste Erfahrung empfehlen wir
+        die Nutzung auf einem größeren Bildschirm.
+      </div>
+
+      <div class="editor-container">
+        <div class="tools-panel">
+          <div class="tools-section">
+            <div class="section-title">Werkzeuge</div>
+            <div class="tool-buttons">
+              <button
+                id="material-tool"
+                class="tool-btn active"
+                title="Material hinzufügen"
+              >
+                <i class="fas fa-square"></i>
+              </button>
+              <button id="eraser-tool" class="tool-btn" title="Radiergummi">
+                <i class="fas fa-eraser"></i>
+              </button>
+              <button
+                id="material-swoosh-tool"
+                class="tool-btn"
+                title="Material Swoosh"
+              >
+                <i class="fas fa-paint-roller"></i>
+              </button>
+              <button
+                id="eraser-swoosh-tool"
+                class="tool-btn"
+                title="Radiergummi Swoosh"
+              >
+                <i class="fas fa-brush"></i>
+              </button>
+            </div>
+          </div>
+
+          <div class="tools-section">
+            <div class="section-title">Grid-Einstellungen</div>
+            <div class="grid-settings">
+              <div class="setting-group">
+                <div class="setting-label">Grid-Größe</div>
+                <div class="setting-input">
+                  <input
+                    type="number"
+                    id="grid-width"
+                    min="1"
+                    max="100"
+                    value="20"
+                  />
+                  x
+                  <input
+                    type="number"
+                    id="grid-height"
+                    min="1"
+                    max="100"
+                    value="20"
+                  />
+                </div>
+              </div>
+
+              <div class="setting-group">
+                <div class="setting-label">Zellengröße (px)</div>
+                <div class="setting-input">
+                  <input
+                    type="number"
+                    id="cell-size"
+                    min="10"
+                    max="100"
+                    value="30"
+                  />
+                </div>
+              </div>
+
+              <button id="apply-grid" class="btn btn-primary">
+                <i class="fas fa-sync-alt"></i> Grid anwenden
+              </button>
+            </div>
+          </div>
+
+          <div class="tools-section">
+            <div class="section-title">Export</div>
+            <button id="export-svg" class="btn btn-success">
+              <i class="fas fa-file-export"></i> Als SVG exportieren
+            </button>
+          </div>
+        </div>
+
+        <div class="canvas-container">
+          <div class="canvas-header">
+            <div class="canvas-title">Design-Bereich</div>
+          </div>
+          <div id="canvas-wrapper">
+            <canvas id="grid-canvas"></canvas>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <footer>
+      <div class="container">
+        <p>&copy; 2023 PixelCut - Einfache Designs für deinen Lasercutter</p>
+      </div>
+    </footer>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        // Canvas und Kontext
+        const canvas = document.getElementById("grid-canvas");
+        const ctx = canvas.getContext("2d");
+
+        // Grid-Einstellungen
+        let gridWidth = 20;
+        let gridHeight = 20;
+        let cellSize = 30;
+        let grid = [];
+
+        // Werkzeuge
+        const tools = {
+          material: document.getElementById("material-tool"),
+          eraser: document.getElementById("eraser-tool"),
+          materialSwoosh: document.getElementById("material-swoosh-tool"),
+          eraserSwoosh: document.getElementById("eraser-swoosh-tool"),
+        };
+
+        let activeTool = "material";
+        let isDrawing = false;
+
+        // Initialisierung
+        initGrid();
+        setupEventListeners();
+
+        // Grid initialisieren
+        function initGrid() {
+          gridWidth = parseInt(document.getElementById("grid-width").value);
+          gridHeight = parseInt(document.getElementById("grid-height").value);
+          cellSize = parseInt(document.getElementById("cell-size").value);
+
+          // Canvas-Größe anpassen
+          canvas.width = gridWidth * cellSize;
+          canvas.height = gridHeight * cellSize;
+
+          // Grid-Array initialisieren (false = kein Material)
+          grid = Array(gridHeight)
+            .fill()
+            .map(() => Array(gridWidth).fill(false));
+
+          // Grid zeichnen
+          drawGrid();
+        }
+
+        // Grid zeichnen
+        function drawGrid() {
+          // Canvas löschen
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+          // Grid-Linien zeichnen
+          ctx.strokeStyle = "#dfe6e9";
+          ctx.lineWidth = 1;
+
+          // Vertikale Linien
+          for (let x = 0; x <= gridWidth; x++) {
+            ctx.beginPath();
+            ctx.moveTo(x * cellSize, 0);
+            ctx.lineTo(x * cellSize, gridHeight * cellSize);
+            ctx.stroke();
+          }
+
+          // Horizontale Linien
+          for (let y = 0; y <= gridHeight; y++) {
+            ctx.beginPath();
+            ctx.moveTo(0, y * cellSize);
+            ctx.lineTo(gridWidth * cellSize, y * cellSize);
+            ctx.stroke();
+          }
+
+          // Gefüllte Zellen zeichnen
+          ctx.fillStyle = "#2c3e50";
+          for (let y = 0; y < gridHeight; y++) {
+            for (let x = 0; x < gridWidth; x++) {
+              if (grid[y][x]) {
+                ctx.fillRect(
+                  x * cellSize + 1,
+                  y * cellSize + 1,
+                  cellSize - 2,
+                  cellSize - 2
+                );
+              }
+            }
+          }
+        }
+
+        // Event-Listener einrichten
+        function setupEventListeners() {
+          // Grid-Einstellungen anwenden
+          document
+            .getElementById("apply-grid")
+            .addEventListener("click", initGrid);
+
+          // Werkzeug-Buttons
+          for (const [toolName, toolButton] of Object.entries(tools)) {
+            toolButton.addEventListener("click", () => {
+              setActiveTool(toolName);
+            });
+          }
+
+          // Canvas-Interaktionen
+          canvas.addEventListener("mousedown", startDrawing);
+          canvas.addEventListener("mousemove", draw);
+          canvas.addEventListener("mouseup", stopDrawing);
+          canvas.addEventListener("mouseleave", stopDrawing);
+
+          // Touch-Unterstützung
+          canvas.addEventListener("touchstart", handleTouch);
+          canvas.addEventListener("touchmove", handleTouch);
+          canvas.addEventListener("touchend", stopDrawing);
+
+          // Export-Button
+          document
+            .getElementById("export-svg")
+            .addEventListener("click", exportSVG);
+        }
+
+        // Aktives Werkzeug setzen
+        function setActiveTool(toolName) {
+          activeTool = toolName;
+
+          // Alle Buttons zurücksetzen
+          for (const button of Object.values(tools)) {
+            button.classList.remove("active");
+          }
+
+          // Aktiven Button markieren
+          tools[toolName].classList.add("active");
+        }
+
+        // Zeichnen starten
+        function startDrawing(e) {
+          isDrawing = true;
+          const { x, y } = getCellCoordinates(e);
+          updateCell(x, y);
+        }
+
+        // Zeichnen
+        function draw(e) {
+          if (!isDrawing) return;
+
+          const { x, y } = getCellCoordinates(e);
+          updateCell(x, y);
+        }
+
+        // Zeichnen beenden
+        function stopDrawing() {
+          isDrawing = false;
+        }
+
+        // Touch-Events behandeln
+        function handleTouch(e) {
+          e.preventDefault();
+
+          const touch = e.touches[0];
+          const mouseEvent = new MouseEvent(
+            e.type === "touchstart" ? "mousedown" : "mousemove",
+            {
+              clientX: touch.clientX,
+              clientY: touch.clientY,
+            }
+          );
+
+          canvas.dispatchEvent(mouseEvent);
+        }
+
+        // Zellkoordinaten aus Mausposition ermitteln
+        function getCellCoordinates(e) {
+          const rect = canvas.getBoundingClientRect();
+          const scaleX = canvas.width / rect.width;
+          const scaleY = canvas.height / rect.height;
+
+          const x = Math.floor(((e.clientX - rect.left) * scaleX) / cellSize);
+          const y = Math.floor(((e.clientY - rect.top) * scaleY) / cellSize);
+
+          return { x, y };
+        }
+
+        // Zelle aktualisieren
+        function updateCell(x, y) {
+          // Prüfen, ob Koordinaten im Grid liegen
+          if (x < 0 || x >= gridWidth || y < 0 || y >= gridHeight) {
+            return;
+          }
+
+          // Zelle je nach Werkzeug aktualisieren
+          switch (activeTool) {
+            case "material":
+            case "materialSwoosh":
+              grid[y][x] = true;
+              break;
+            case "eraser":
+            case "eraserSwoosh":
+              grid[y][x] = false;
+              break;
+          }
+
+          // Grid neu zeichnen
+          drawGrid();
+        }
+
+        // SVG exportieren
+        function exportSVG() {
+          // Rechtecke für jede gefüllte Zelle erstellen
+          const rects = [];
+          for (let y = 0; y < gridHeight; y++) {
+            for (let x = 0; x < gridWidth; x++) {
+              if (grid[y][x]) {
+                rects.push({
+                  x: x * cellSize,
+                  y: y * cellSize,
+                  width: cellSize,
+                  height: cellSize,
+                });
+              }
+            }
+          }
+
+          // Rechtecke zusammenfassen
+          const mergedRects = mergeRectangles(rects);
+
+          // SVG erstellen
+          const svgWidth = gridWidth * cellSize;
+          const svgHeight = gridHeight * cellSize;
+
+          let svgContent = `<svg width="${svgWidth}" height="${svgHeight}" xmlns="http://www.w3.org/2000/svg">`;
+
+          // Pfad für alle zusammengefassten Rechtecke
+          svgContent += '<path d="';
+
+          mergedRects.forEach((rect) => {
+            svgContent += `M${rect.x},${rect.y} `;
+            svgContent += `h${rect.width} v${rect.height} h-${rect.width} z `;
+          });
+
+          svgContent += '" fill="black" />';
+          svgContent += "</svg>";
+
+          // SVG herunterladen
+          downloadSVG(svgContent);
+        }
+
+        // Rechtecke zusammenfassen
+        function mergeRectangles(rects) {
+          // Diese Funktion ist eine vereinfachte Version und führt nur horizontale Zusammenführungen durch
+          // Eine vollständige Implementierung würde komplexere Algorithmen erfordern
+
+          if (rects.length === 0) return [];
+
+          // Nach Y-Koordinate sortieren
+          rects.sort((a, b) => a.y - b.y || a.x - b.x);
+
+          const mergedRects = [];
+          let currentRect = { ...rects[0] };
+
+          for (let i = 1; i < rects.length; i++) {
+            const rect = rects[i];
+
+            // Wenn das aktuelle Rechteck direkt neben dem vorherigen liegt und die gleiche Höhe und Y-Position hat
+            if (
+              rect.y === currentRect.y &&
+              rect.height === currentRect.height &&
+              rect.x === currentRect.x + currentRect.width
+            ) {
+              // Rechtecke horizontal zusammenfassen
+              currentRect.width += rect.width;
+            } else {
+              // Aktuelles Rechteck speichern und mit neuem fortfahren
+              mergedRects.push(currentRect);
+              currentRect = { ...rect };
+            }
+          }
+
+          // Letztes Rechteck hinzufügen
+          mergedRects.push(currentRect);
+
+          return mergedRects;
+        }
+
+        // SVG herunterladen
+        function downloadSVG(svgContent) {
+          const blob = new Blob([svgContent], { type: "image/svg+xml" });
+          const url = URL.createObjectURL(blob);
+
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = "pixelcut-design.svg";
+          document.body.appendChild(a);
+          a.click();
+
+          setTimeout(() => {
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+          }, 100);
+        }
+      });
+    </script>
+  </body>
+</html>
