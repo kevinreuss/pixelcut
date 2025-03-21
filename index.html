@@ -347,6 +347,25 @@
         max-height: 60vh;
         background-color: white;
       }
+
+      .tool-groups {
+        display: flex;
+        flex-direction: row;
+        gap: 4rem;
+      }
+
+      .tool-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+
+      .tool-group-title {
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #7f8c8d;
+        margin-bottom: 0.25rem;
+      }
     </style>
   </head>
   <body>
@@ -452,31 +471,41 @@
         <div class="canvas-container">
           <div class="canvas-header">
             <div class="tools-section">
-              <div class="tool-buttons">
-                <button
-                  id="material-tool"
-                  class="tool-btn active"
-                  title="Add Material"
-                >
-                  <i class="fas fa-square"></i>
-                </button>
-                <button id="eraser-tool" class="tool-btn" title="Eraser">
-                  <i class="fas fa-eraser"></i>
-                </button>
-                <button
-                  id="material-swoosh-tool"
-                  class="tool-btn"
-                  title="Material Swoosh"
-                >
-                  <i class="fas fa-paint-roller"></i>
-                </button>
-                <button
-                  id="eraser-swoosh-tool"
-                  class="tool-btn"
-                  title="Eraser Swoosh"
-                >
-                  <i class="fas fa-eraser"></i>
-                </button>
+              <div class="tool-groups">
+                <div class="tool-group">
+                  <div class="tool-group-title">Single Cell Tools:</div>
+                  <div class="tool-buttons">
+                    <button
+                      id="material-tool"
+                      class="tool-btn active"
+                      title="Add Material"
+                    >
+                      <i class="fas fa-square"></i>
+                    </button>
+                    <button id="eraser-tool" class="tool-btn" title="Eraser">
+                      <i class="fas fa-eraser"></i>
+                    </button>
+                  </div>
+                </div>
+                <div class="tool-group">
+                  <div class="tool-group-title">Multi Cell Tools:</div>
+                  <div class="tool-buttons">
+                    <button
+                      id="material-swoosh-tool"
+                      class="tool-btn"
+                      title="Material Swoosh"
+                    >
+                      <i class="fas fa-paint-roller"></i>
+                    </button>
+                    <button
+                      id="eraser-swoosh-tool"
+                      class="tool-btn"
+                      title="Eraser Swoosh"
+                    >
+                      <i class="fas fa-eraser"></i>
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
