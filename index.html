@@ -593,23 +593,8 @@
 
         // SVG exportieren
         function exportSVG() {
-          // Rechtecke für jede gefüllte Zelle erstellen
-          const rects = [];
-          for (let y = 0; y < gridHeight; y++) {
-            for (let x = 0; x < gridWidth; x++) {
-              if (grid[y][x]) {
-                rects.push({
-                  x: x * cellSize,
-                  y: y * cellSize,
-                  width: cellSize,
-                  height: cellSize,
-                });
-              }
-            }
-          }
-
-          // Rechtecke zusammenfassen (horizontal und vertikal)
-          const mergedRects = mergeRectanglesImproved(rects);
+          // Pfade für die Außenkanten aller gefüllten Zellen erstellen
+          const paths = generateOutlinePaths();
 
           // SVG erstellen
           const svgWidth = gridWidth * cellSize;
@@ -617,10 +602,9 @@
 
           let svgContent = `<svg width="${svgWidth}" height="${svgHeight}" xmlns="http://www.w3.org/2000/svg">`;
 
-          // Pfade für alle zusammengefassten Rechtecke mit roter Kontur und ohne Füllung
-          mergedRects.forEach((rect) => {
-            svgContent += `<rect x="${rect.x}" y="${rect.y}" width="${rect.width}" height="${rect.height}" 
-                           fill="none" stroke="red" stroke-width="1" />`;
+          // Pfade mit roter Kontur und ohne Füllung
+          paths.forEach((path) => {
+            svgContent += `<path d="${path}" fill="none" stroke="red" stroke-width="1" />`;
           });
 
           svgContent += "</svg>";
@@ -629,88 +613,103 @@
           downloadSVG(svgContent);
         }
 
-        // Verbesserte Rechteck-Zusammenführung (horizontal und vertikal)
-        function mergeRectanglesImproved(rects) {
-          if (rects.length === 0) return [];
+        // Umrisspfade generieren
+        function generateOutlinePaths() {
+          // Temporäres Grid erstellen, das um 1 größer ist (für Randprüfung)
+          const tempGrid = Array(gridHeight + 2)
+            .fill()
+            .map(() => Array(gridWidth + 2).fill(false));
 
-          // Kopie der Rechtecke erstellen
-          let rectangles = rects.map((r) => ({ ...r }));
-          let merged = true;
-
-          // Solange Rechtecke zusammengeführt werden können
-          while (merged) {
-            merged = false;
-
-            // Horizontale Zusammenführung
-            for (let i = 0; i < rectangles.length; i++) {
-              for (let j = 0; j < rectangles.length; j++) {
-                if (i === j) continue;
-
-                const r1 = rectangles[i];
-                const r2 = rectangles[j];
-
-                // Prüfen, ob Rechtecke horizontal zusammengeführt werden können
-                if (
-                  r1.y === r2.y &&
-                  r1.height === r2.height &&
-                  (r1.x + r1.width === r2.x || r2.x + r2.width === r1.x)
-                ) {
-                  // Neues zusammengeführtes Rechteck erstellen
-                  const newRect = {
-                    x: Math.min(r1.x, r2.x),
-                    y: r1.y,
-                    width: r1.width + r2.width,
-                    height: r1.height,
-                  };
-
-                  // Alte Rechtecke entfernen und neues hinzufügen
-                  rectangles.splice(j, 1);
-                  rectangles.splice(i, 1, newRect);
-
-                  merged = true;
-                  break;
-                }
-              }
-              if (merged) break;
-            }
-
-            if (!merged) {
-              // Vertikale Zusammenführung
-              for (let i = 0; i < rectangles.length; i++) {
-                for (let j = 0; j < rectangles.length; j++) {
-                  if (i === j) continue;
-
-                  const r1 = rectangles[i];
-                  const r2 = rectangles[j];
-
-                  // Prüfen, ob Rechtecke vertikal zusammengeführt werden können
-                  if (
-                    r1.x === r2.x &&
-                    r1.width === r2.width &&
-                    (r1.y + r1.height === r2.y || r2.y + r2.height === r1.y)
-                  ) {
-                    // Neues zusammengeführtes Rechteck erstellen
-                    const newRect = {
-                      x: r1.x,
-                      y: Math.min(r1.y, r2.y),
-                      width: r1.width,
-                      height: r1.height + r2.height,
-                    };
-
-                    // Alte Rechtecke entfernen und neues hinzufügen
-                    rectangles.splice(j, 1);
-                    rectangles.splice(i, 1, newRect);
-
-                    merged = true;
-                    break;
-                  }
-                }
-                if (merged) break;
-              }
+          // Daten aus dem eigentlichen Grid kopieren
+          for (let y = 0; y < gridHeight; y++) {
+            for (let x = 0; x < gridWidth; x++) {
+              tempGrid[y + 1][x + 1] = grid[y][x];
             }
           }
 
-          return rectangles;
+          const paths = [];
+
+          // Horizontale Linien finden
+          for (let y = 0; y <= gridHeight; y++) {
+            let pathSegments = [];
+            let isDrawing = false;
+            let startX = 0;
+
+            for (let x = 0; x <= gridWidth; x++) {
+              // Prüfen, ob hier eine horizontale Linie gezeichnet werden muss
+              // (wenn eine Zelle gefüllt ist und die darüber nicht, oder umgekehrt)
+              const cellBelow = y < gridHeight ? tempGrid[y + 1][x + 1] : false;
+              const cellAbove = y > 0 ? tempGrid[y][x + 1] : false;
+
+              if (cellBelow !== cellAbove) {
+                // Linie beginnen oder fortsetzen
+                if (!isDrawing) {
+                  isDrawing = true;
+                  startX = x;
+                }
+              } else if (isDrawing) {
+                // Linie beenden
+                pathSegments.push(
+                  `M${startX * cellSize},${y * cellSize} H${x * cellSize}`
+                );
+                isDrawing = false;
+              }
+            }
+
+            // Letzte Linie in der Zeile beenden, falls nötig
+            if (isDrawing) {
+              pathSegments.push(
+                `M${startX * cellSize},${y * cellSize} H${gridWidth * cellSize}`
+              );
+            }
+
+            if (pathSegments.length > 0) {
+              paths.push(pathSegments.join(" "));
+            }
+          }
+
+          // Vertikale Linien finden
+          for (let x = 0; x <= gridWidth; x++) {
+            let pathSegments = [];
+            let isDrawing = false;
+            let startY = 0;
+
+            for (let y = 0; y <= gridHeight; y++) {
+              // Prüfen, ob hier eine vertikale Linie gezeichnet werden muss
+              // (wenn eine Zelle gefüllt ist und die links davon nicht, oder umgekehrt)
+              const cellRight = x < gridWidth ? tempGrid[y + 1][x + 1] : false;
+              const cellLeft = x > 0 ? tempGrid[y + 1][x] : false;
+
+              if (cellRight !== cellLeft) {
+                // Linie beginnen oder fortsetzen
+                if (!isDrawing) {
+                  isDrawing = true;
+                  startY = y;
+                }
+              } else if (isDrawing) {
+                // Linie beenden
+                pathSegments.push(
+                  `M${x * cellSize},${startY * cellSize} V${y * cellSize}`
+                );
+                isDrawing = false;
+              }
+            }
+
+            // Letzte Linie in der Spalte beenden, falls nötig
+            if (isDrawing) {
+              pathSegments.push(
+                `M${x * cellSize},${startY * cellSize} V${
+                  gridHeight * cellSize
+                }`
+              );
+            }
+
+            if (pathSegments.length > 0) {
+              paths.push(pathSegments.join(" "));
+            }
+          }
+
+          return paths;
         }
 
         // SVG herunterladen
