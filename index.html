@@ -460,6 +460,13 @@
                 style="display: none"
               />
             </div>
+            <button
+              id="load-example"
+              class="btn btn-dark"
+              style="margin-top: 0.5rem"
+            >
+              <i class="fas fa-lightbulb"></i> Load Example
+            </button>
           </div>
 
           <div class="tools-section">
@@ -544,6 +551,22 @@
       </div>
     </div>
 
+    <!-- Examples Modal -->
+    <div id="examples-modal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>Load Example</h2>
+          <span class="close-examples-modal">&times;</span>
+        </div>
+        <div class="modal-body">
+          <div class="examples-grid">
+            <!-- Examples will be inserted here by JavaScript -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="examples.js"></script>
     <script>
       document.addEventListener("DOMContentLoaded", function () {
         // Canvas und Kontext
@@ -762,13 +785,27 @@
             .querySelector(".close-modal")
             .addEventListener("click", closeModal);
 
+          // Examples Modal schließen
+          document
+            .querySelector(".close-examples-modal")
+            .addEventListener("click", closeExamplesModal);
+
           // Klick außerhalb des Modals schließt es
           window.addEventListener("click", function (event) {
             const modal = document.getElementById("svg-modal");
+            const examplesModal = document.getElementById("examples-modal");
             if (event.target === modal) {
               closeModal();
             }
+            if (event.target === examplesModal) {
+              closeExamplesModal();
+            }
           });
+
+          // Load Example Button
+          document
+            .getElementById("load-example")
+            .addEventListener("click", showExamplesModal);
 
           // Download-Button
           document
@@ -1125,6 +1162,121 @@
           };
 
           reader.readAsText(file);
+        }
+
+        // Examples Modal anzeigen
+        function showExamplesModal() {
+          // Examples Grid leeren
+          const examplesGrid = document.querySelector(".examples-grid");
+          examplesGrid.innerHTML = "";
+
+          // Examples einfügen
+          pixelcutExamples.forEach((example, index) => {
+            const exampleCard = document.createElement("div");
+            exampleCard.className = "example-card";
+
+            // Vorschau-Canvas erstellen
+            const previewCanvas = document.createElement("canvas");
+            previewCanvas.width = 150;
+            previewCanvas.height = 150;
+            const previewCtx = previewCanvas.getContext("2d");
+
+            // Beispiel auf Canvas zeichnen
+            drawExamplePreview(previewCtx, example);
+
+            // Titel und Beschreibung
+            const exampleInfo = document.createElement("div");
+            exampleInfo.className = "example-info";
+            exampleInfo.innerHTML = `
+              <h3>${example.title}</h3>
+              <p>${example.description}</p>
+            `;
+
+            // Load-Button
+            const loadButton = document.createElement("button");
+            loadButton.className = "btn btn-primary load-example-btn";
+            loadButton.innerHTML = "Load";
+            loadButton.dataset.index = index;
+            loadButton.addEventListener("click", function () {
+              loadExample(index);
+              closeExamplesModal();
+            });
+
+            // Alles zusammenfügen
+            exampleCard.appendChild(previewCanvas);
+            exampleCard.appendChild(exampleInfo);
+            exampleCard.appendChild(loadButton);
+            examplesGrid.appendChild(exampleCard);
+          });
+
+          // Modal anzeigen
+          document.getElementById("examples-modal").style.display = "block";
+        }
+
+        // Beispiel-Vorschau zeichnen
+        function drawExamplePreview(ctx, example) {
+          const previewWidth = ctx.canvas.width;
+          const previewHeight = ctx.canvas.height;
+
+          // Hintergrund
+          ctx.fillStyle = "white";
+          ctx.fillRect(0, 0, previewWidth, previewHeight);
+
+          // Skalierungsfaktor berechnen
+          const scaleX = previewWidth / (example.gridWidth * example.cellSize);
+          const scaleY =
+            previewHeight / (example.gridHeight * example.cellSize);
+          const scale = Math.min(scaleX, scaleY) * 0.9; // 10% Rand
+
+          // Zentrieren
+          const offsetX =
+            (previewWidth - example.gridWidth * example.cellSize * scale) / 2;
+          const offsetY =
+            (previewHeight - example.gridHeight * example.cellSize * scale) / 2;
+
+          // Grid zeichnen
+          ctx.fillStyle = "#2c3e50";
+          for (let y = 0; y < example.gridHeight; y++) {
+            for (let x = 0; x < example.gridWidth; x++) {
+              if (example.grid[y][x]) {
+                ctx.fillRect(
+                  offsetX + x * example.cellSize * scale,
+                  offsetY + y * example.cellSize * scale,
+                  example.cellSize * scale,
+                  example.cellSize * scale
+                );
+              }
+            }
+          }
+        }
+
+        // Beispiel laden
+        function loadExample(index) {
+          const example = pixelcutExamples[index];
+
+          // Grid-Einstellungen aktualisieren
+          document.getElementById("grid-width").value = example.gridWidth;
+          document.getElementById("grid-height").value = example.gridHeight;
+          document.getElementById("cell-size").value = example.cellSize;
+
+          // Werte übernehmen
+          gridWidth = example.gridWidth;
+          gridHeight = example.gridHeight;
+          cellSize = example.cellSize;
+          grid = JSON.parse(JSON.stringify(example.grid)); // Deep copy
+
+          // Canvas-Größe anpassen und neu zeichnen
+          canvas.width = gridWidth * cellSize;
+          canvas.height = gridHeight * cellSize;
+          drawGrid();
+
+          // Im localStorage speichern
+          saveToLocalStorage();
+        }
+
+        // Examples Modal schließen
+        function closeExamplesModal() {
+          document.getElementById("examples-modal").style.display = "none";
         }
       });
     </script>
