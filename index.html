@@ -275,6 +275,78 @@
           display: block;
         }
       }
+
+      /* Modal Styles */
+      .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+      }
+
+      .modal-content {
+        background-color: white;
+        margin: 10% auto;
+        padding: 0;
+        width: 80%;
+        max-width: 800px;
+        border-radius: 8px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        max-height: 80vh;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem 1.5rem;
+        border-bottom: 1px solid #dfe6e9;
+      }
+
+      .modal-header h2 {
+        margin: 0;
+        font-size: 1.5rem;
+        color: var(--dark);
+      }
+
+      .close-modal {
+        font-size: 1.8rem;
+        font-weight: bold;
+        color: #7f8c8d;
+        cursor: pointer;
+      }
+
+      .close-modal:hover {
+        color: var(--dark);
+      }
+
+      .modal-body {
+        padding: 1.5rem;
+        overflow-y: auto;
+      }
+
+      #svg-preview-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 300px;
+        border: 1px solid #dfe6e9;
+        border-radius: 4px;
+        padding: 1rem;
+        background-color: #f9f9f9;
+      }
+
+      #svg-preview-container svg {
+        max-width: 100%;
+        max-height: 60vh;
+        background-color: white;
+      }
     </style>
   </head>
   <body>
@@ -364,6 +436,13 @@
 
           <div class="tools-section">
             <div class="section-title">Export</div>
+            <button
+              id="preview-svg"
+              class="btn btn-primary"
+              style="margin-bottom: 0.5rem"
+            >
+              <i class="fas fa-eye"></i> Preview SVG
+            </button>
             <button id="export-svg" class="btn btn-success">
               <i class="fas fa-file-export"></i> Export as SVG
             </button>
@@ -413,6 +492,19 @@
         <p>&copy; 2025 PixelCut - Simple Designs for your Laser Cutter</p>
       </div>
     </footer>
+
+    <!-- SVG Preview Modal -->
+    <div id="svg-modal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>SVG Preview</h2>
+          <span class="close-modal">&times;</span>
+        </div>
+        <div class="modal-body">
+          <div id="svg-preview-container"></div>
+        </div>
+      </div>
+    </div>
 
     <script>
       document.addEventListener("DOMContentLoaded", function () {
@@ -587,6 +679,24 @@
             .getElementById("export-svg")
             .addEventListener("click", exportSVG);
 
+          // Preview-Button
+          document
+            .getElementById("preview-svg")
+            .addEventListener("click", previewSVG);
+
+          // Modal schließen
+          document
+            .querySelector(".close-modal")
+            .addEventListener("click", closeModal);
+
+          // Klick außerhalb des Modals schließt es
+          window.addEventListener("click", function (event) {
+            const modal = document.getElementById("svg-modal");
+            if (event.target === modal) {
+              closeModal();
+            }
+          });
+
           // Download-Button
           document
             .getElementById("download-json")
@@ -716,6 +826,57 @@
 
           // SVG herunterladen
           downloadSVG(svgContent);
+        }
+
+        // SVG Vorschau anzeigen
+        function previewSVG() {
+          // Pfade für die Außenkanten aller gefüllten Zellen erstellen
+          const paths = generateOutlinePaths();
+
+          // SVG erstellen
+          const svgWidth = gridWidth * cellSize;
+          const svgHeight = gridHeight * cellSize;
+
+          let svgContent = `<svg width="${svgWidth}" height="${svgHeight}" xmlns="http://www.w3.org/2000/svg">`;
+
+          // Pfade mit roter Kontur und ohne Füllung
+          paths.forEach((path) => {
+            svgContent += `<path d="${path}" fill="none" stroke="red" stroke-width="1" />`;
+          });
+
+          svgContent += "</svg>";
+
+          // SVG in Container einfügen
+          const previewContainer = document.getElementById(
+            "svg-preview-container"
+          );
+          previewContainer.innerHTML = svgContent;
+
+          // Modal öffnen
+          document.getElementById("svg-modal").style.display = "block";
+        }
+
+        // Modal schließen
+        function closeModal() {
+          document.getElementById("svg-modal").style.display = "none";
+        }
+
+        // SVG herunterladen
+        function downloadSVG(svgContent) {
+          const blob = new Blob([svgContent], { type: "image/svg+xml" });
+          const url = URL.createObjectURL(blob);
+
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = "pixelcut-design.svg";
+          document.body.appendChild(a);
+          a.click();
+
+          // Aufräumen
+          setTimeout(() => {
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+          }, 0);
         }
 
         // Umrisspfade generieren
