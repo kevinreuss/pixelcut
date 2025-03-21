@@ -340,6 +340,28 @@
               <i class="fas fa-file-export"></i> Export as SVG
             </button>
           </div>
+
+          <div class="tools-section">
+            <div class="section-title">Save/Load</div>
+            <button id="download-json" class="btn btn-primary">
+              <i class="fas fa-download"></i> Download State
+            </button>
+            <div style="margin-top: 0.5rem">
+              <label
+                for="upload-json"
+                class="btn btn-primary"
+                style="cursor: pointer; width: 100%; box-sizing: border-box"
+              >
+                <i class="fas fa-upload"></i> Upload State
+              </label>
+              <input
+                type="file"
+                id="upload-json"
+                accept=".json"
+                style="display: none"
+              />
+            </div>
+          </div>
         </div>
 
         <div class="canvas-container">
@@ -558,6 +580,16 @@
           document
             .getElementById("export-svg")
             .addEventListener("click", exportSVG);
+
+          // Download-Button
+          document
+            .getElementById("download-json")
+            .addEventListener("click", downloadState);
+
+          // Upload-Input
+          document
+            .getElementById("upload-json")
+            .addEventListener("change", uploadState);
         }
 
         // Aktives Werkzeug setzen
@@ -777,6 +809,82 @@
           }
 
           return paths;
+        }
+
+        // Zustand als JSON herunterladen
+        function downloadState() {
+          const state = {
+            gridWidth,
+            gridHeight,
+            cellSize,
+            grid,
+          };
+
+          const jsonString = JSON.stringify(state, null, 2);
+          const blob = new Blob([jsonString], { type: "application/json" });
+          const url = URL.createObjectURL(blob);
+
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = "pixelcut-state.json";
+          document.body.appendChild(a);
+          a.click();
+
+          // Aufräumen
+          setTimeout(() => {
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+          }, 0);
+        }
+
+        // Zustand aus JSON-Datei laden
+        function uploadState(event) {
+          const file = event.target.files[0];
+          if (!file) return;
+
+          const reader = new FileReader();
+
+          reader.onload = function (e) {
+            try {
+              const state = JSON.parse(e.target.result);
+
+              // Grid-Einstellungen aktualisieren
+              if (state.gridWidth) {
+                document.getElementById("grid-width").value = state.gridWidth;
+                gridWidth = state.gridWidth;
+              }
+
+              if (state.gridHeight) {
+                document.getElementById("grid-height").value = state.gridHeight;
+                gridHeight = state.gridHeight;
+              }
+
+              if (state.cellSize) {
+                document.getElementById("cell-size").value = state.cellSize;
+                cellSize = state.cellSize;
+              }
+
+              // Grid aktualisieren
+              if (state.grid) {
+                grid = state.grid;
+              }
+
+              // Canvas-Größe anpassen und neu zeichnen
+              canvas.width = gridWidth * cellSize;
+              canvas.height = gridHeight * cellSize;
+              drawGrid();
+
+              // Im localStorage speichern
+              saveToLocalStorage();
+
+              // Datei-Input zurücksetzen
+              event.target.value = "";
+            } catch (error) {
+              alert("Error loading file: " + error.message);
+            }
+          };
+
+          reader.readAsText(file);
         }
       });
     </script>
