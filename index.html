@@ -368,7 +368,7 @@
                   class="tool-btn"
                   title="Eraser Swoosh"
                 >
-                  <i class="fas fa-brush"></i>
+                  <i class="fas fa-eraser"></i>
                 </button>
               </div>
             </div>
@@ -409,8 +409,61 @@
         let activeTool = "material";
         let isDrawing = false;
 
-        // Initialisierung
-        initGrid();
+        // Aus localStorage laden, falls vorhanden
+        function loadFromLocalStorage() {
+          const savedState = localStorage.getItem("pixelcutState");
+
+          if (savedState) {
+            const state = JSON.parse(savedState);
+
+            // Grid-Einstellungen wiederherstellen
+            if (state.gridWidth) {
+              document.getElementById("grid-width").value = state.gridWidth;
+              gridWidth = state.gridWidth;
+            }
+
+            if (state.gridHeight) {
+              document.getElementById("grid-height").value = state.gridHeight;
+              gridHeight = state.gridHeight;
+            }
+
+            if (state.cellSize) {
+              document.getElementById("cell-size").value = state.cellSize;
+              cellSize = state.cellSize;
+            }
+
+            // Zeichnung wiederherstellen
+            if (state.grid) {
+              grid = state.grid;
+            }
+
+            // Canvas-Größe anpassen und neu zeichnen
+            canvas.width = gridWidth * cellSize;
+            canvas.height = gridHeight * cellSize;
+            drawGrid();
+          }
+        }
+
+        // In localStorage speichern
+        function saveToLocalStorage() {
+          const state = {
+            gridWidth,
+            gridHeight,
+            cellSize,
+            grid,
+          };
+
+          localStorage.setItem("pixelcutState", JSON.stringify(state));
+        }
+
+        // Gespeicherten Zustand laden, falls vorhanden
+        loadFromLocalStorage();
+
+        // Wenn kein gespeicherter Zustand vorhanden ist, Grid initialisieren
+        if (grid.length === 0) {
+          initGrid();
+        }
+
         setupEventListeners();
 
         // Grid initialisieren
@@ -430,6 +483,9 @@
 
           // Grid zeichnen
           drawGrid();
+
+          // Änderungen speichern
+          saveToLocalStorage();
         }
 
         // Grid zeichnen
@@ -597,6 +653,9 @@
 
           // Grid neu zeichnen
           drawGrid();
+
+          // Änderungen speichern
+          saveToLocalStorage();
         }
 
         // SVG exportieren
@@ -718,23 +777,6 @@
           }
 
           return paths;
-        }
-
-        // SVG herunterladen
-        function downloadSVG(svgContent) {
-          const blob = new Blob([svgContent], { type: "image/svg+xml" });
-          const url = URL.createObjectURL(blob);
-
-          const a = document.createElement("a");
-          a.href = url;
-          a.download = "pixelcut-design.svg";
-          document.body.appendChild(a);
-          a.click();
-
-          setTimeout(() => {
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-          }, 100);
         }
       });
     </script>
