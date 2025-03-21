@@ -461,6 +461,64 @@
         display: flex;
         justify-content: flex-end;
       }
+
+      .header-menu {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+      }
+
+      .btn-sm {
+        padding: 0.5rem 1rem;
+        font-size: 0.9rem;
+      }
+
+      .dropdown {
+        position: relative;
+        display: inline-block;
+      }
+
+      .dropdown-toggle::after {
+        content: "\f078";
+        font-family: "Font Awesome 5 Free";
+        font-weight: 900;
+        font-size: 0.8rem;
+        margin-left: 0.5rem;
+      }
+
+      .dropdown-content {
+        display: none;
+        position: absolute;
+        right: 0;
+        background-color: white;
+        min-width: 180px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        z-index: 1;
+        border-radius: 6px;
+        overflow: hidden;
+      }
+
+      .dropdown:hover .dropdown-content {
+        display: block;
+      }
+
+      .dropdown-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1rem;
+        border: none;
+        background: none;
+        width: 100%;
+        text-align: left;
+        cursor: pointer;
+        font-size: 0.9rem;
+        color: var(--dark);
+      }
+
+      .dropdown-item:hover {
+        background-color: #f9f9f9;
+      }
     </style>
   </head>
   <body>
@@ -483,6 +541,51 @@
 
       <div class="editor-container">
         <div class="tools-panel">
+          <div class="tools-section">
+            <div class="section-title">Grid Settings</div>
+            <div class="section-content">
+              <div class="grid-settings">
+                <div class="setting-group">
+                  <div class="setting-label">Grid Size</div>
+                  <div class="setting-input">
+                    <input
+                      type="number"
+                      id="grid-width"
+                      min="1"
+                      max="100"
+                      value="20"
+                    />
+                    x
+                    <input
+                      type="number"
+                      id="grid-height"
+                      min="1"
+                      max="100"
+                      value="20"
+                    />
+                  </div>
+                </div>
+
+                <div class="setting-group">
+                  <div class="setting-label">Cell Size (px)</div>
+                  <div class="setting-input">
+                    <input
+                      type="number"
+                      id="cell-size"
+                      min="10"
+                      max="100"
+                      value="30"
+                    />
+                  </div>
+                </div>
+
+                <button id="apply-grid" class="btn btn-primary">
+                  <i class="fas fa-sync-alt"></i> Apply Grid
+                </button>
+              </div>
+            </div>
+          </div>
+
           <div class="tools-section">
             <div class="section-title">Keep Updated</div>
             <div class="section-content">
@@ -531,98 +634,6 @@
               </form>
             </div>
           </div>
-
-          <div class="tools-section">
-            <div class="section-title">Grid Settings</div>
-            <div class="section-content">
-              <div class="grid-settings">
-                <div class="setting-group">
-                  <div class="setting-label">Grid Size</div>
-                  <div class="setting-input">
-                    <input
-                      type="number"
-                      id="grid-width"
-                      min="1"
-                      max="100"
-                      value="20"
-                    />
-                    x
-                    <input
-                      type="number"
-                      id="grid-height"
-                      min="1"
-                      max="100"
-                      value="20"
-                    />
-                  </div>
-                </div>
-
-                <div class="setting-group">
-                  <div class="setting-label">Cell Size (px)</div>
-                  <div class="setting-input">
-                    <input
-                      type="number"
-                      id="cell-size"
-                      min="10"
-                      max="100"
-                      value="30"
-                    />
-                  </div>
-                </div>
-
-                <button id="apply-grid" class="btn btn-primary">
-                  <i class="fas fa-sync-alt"></i> Apply Grid
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <div class="tools-section">
-            <div class="section-title">Save/Load</div>
-            <div class="section-content">
-              <button
-                id="load-example"
-                class="btn btn-dark"
-                style="margin-top: 0.5rem"
-              >
-                <i class="fas fa-lightbulb"></i> Load Example
-              </button>
-              <button id="download-json" class="btn btn-dark">
-                <i class="fas fa-download"></i> Download State
-              </button>
-              <div style="margin-top: 0.5rem">
-                <label
-                  for="upload-json"
-                  class="btn btn-dark"
-                  style="cursor: pointer; width: 100%; box-sizing: border-box"
-                >
-                  <i class="fas fa-upload"></i> Upload State
-                </label>
-                <input
-                  type="file"
-                  id="upload-json"
-                  accept=".json"
-                  style="display: none"
-                />
-              </div>
-            </div>
-          </div>
-
-          <div class="tools-section">
-            <div class="section-title">Export</div>
-            <div class="section-content">
-              <button
-                id="preview-svg"
-                class="btn btn-success"
-                style="margin-bottom: 0.5rem"
-              >
-                <i class="fas fa-eye"></i> Preview SVG
-              </button>
-              <button id="export-svg" class="btn btn-success">
-                <i class="fas fa-file-export"></i> Export as SVG
-              </button>
-            </div>
-          </div>
         </div>
 
         <div class="canvas-container">
@@ -662,6 +673,46 @@
                       <i class="fas fa-eraser"></i>
                     </button>
                   </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="header-menu">
+              <button id="load-example" class="btn btn-dark btn-sm">
+                <i class="fas fa-lightbulb"></i> Load Example
+              </button>
+
+              <div class="dropdown">
+                <button class="btn btn-dark btn-sm dropdown-toggle">
+                  <i class="fas fa-save"></i> Save/Load
+                </button>
+                <div class="dropdown-content">
+                  <button id="download-json" class="dropdown-item">
+                    <i class="fas fa-download"></i> Download State
+                  </button>
+                  <label for="upload-json" class="dropdown-item">
+                    <i class="fas fa-upload"></i> Upload State
+                  </label>
+                  <input
+                    type="file"
+                    id="upload-json"
+                    accept=".json"
+                    style="display: none"
+                  />
+                </div>
+              </div>
+
+              <div class="dropdown">
+                <button class="btn btn-success btn-sm dropdown-toggle">
+                  <i class="fas fa-file-export"></i> Export
+                </button>
+                <div class="dropdown-content">
+                  <button id="preview-svg" class="dropdown-item">
+                    <i class="fas fa-eye"></i> Preview SVG
+                  </button>
+                  <button id="export-svg" class="dropdown-item">
+                    <i class="fas fa-file-export"></i> Export as SVG
+                  </button>
                 </div>
               </div>
             </div>
@@ -964,12 +1015,12 @@
           canvas.addEventListener("touchmove", handleTouch);
           canvas.addEventListener("touchend", stopDrawing);
 
-          // Export-Button
+          // Export-Button in dropdown
           document
             .getElementById("export-svg")
             .addEventListener("click", exportSVG);
 
-          // Preview-Button
+          // Preview-Button in dropdown
           document
             .getElementById("preview-svg")
             .addEventListener("click", previewSVG);
@@ -996,17 +1047,18 @@
             }
           });
 
-          // Load Example Button
-          document
-            .getElementById("load-example")
-            .addEventListener("click", showExamplesModal);
+          // Load Example Button (both in sidebar and header)
+          const loadExampleButtons = document.querySelectorAll("#load-example");
+          loadExampleButtons.forEach((button) => {
+            button.addEventListener("click", showExamplesModal);
+          });
 
-          // Download-Button
+          // Download-Button in dropdown
           document
             .getElementById("download-json")
             .addEventListener("click", downloadState);
 
-          // Upload-Input
+          // Upload-Input in dropdown
           document
             .getElementById("upload-json")
             .addEventListener("change", uploadState);
