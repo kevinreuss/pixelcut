@@ -44,7 +44,6 @@
 
       .container {
         width: 100%;
-        max-width: 1200px;
         margin: 0 auto;
         padding: 0 1rem;
       }
@@ -76,6 +75,7 @@
       .editor-container {
         display: flex;
         flex-direction: column;
+        margin-top: 1.5rem;
         gap: 1.5rem;
       }
 
@@ -250,7 +250,7 @@
         text-align: center;
         color: #7f8c8d;
         font-size: 0.9rem;
-        margin-top: 2rem;
+        margin-top: 1.5rem;
         box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
       }
 
@@ -292,40 +292,10 @@
       <div class="editor-container">
         <div class="tools-panel">
           <div class="tools-section">
-            <div class="section-title">Werkzeuge</div>
-            <div class="tool-buttons">
-              <button
-                id="material-tool"
-                class="tool-btn active"
-                title="Material hinzufügen"
-              >
-                <i class="fas fa-square"></i>
-              </button>
-              <button id="eraser-tool" class="tool-btn" title="Radiergummi">
-                <i class="fas fa-eraser"></i>
-              </button>
-              <button
-                id="material-swoosh-tool"
-                class="tool-btn"
-                title="Material Swoosh"
-              >
-                <i class="fas fa-paint-roller"></i>
-              </button>
-              <button
-                id="eraser-swoosh-tool"
-                class="tool-btn"
-                title="Radiergummi Swoosh"
-              >
-                <i class="fas fa-brush"></i>
-              </button>
-            </div>
-          </div>
-
-          <div class="tools-section">
-            <div class="section-title">Grid-Einstellungen</div>
+            <div class="section-title">Grid Settings</div>
             <div class="grid-settings">
               <div class="setting-group">
-                <div class="setting-label">Grid-Größe</div>
+                <div class="setting-label">Grid Size</div>
                 <div class="setting-input">
                   <input
                     type="number"
@@ -346,7 +316,7 @@
               </div>
 
               <div class="setting-group">
-                <div class="setting-label">Zellengröße (px)</div>
+                <div class="setting-label">Cell Size (px)</div>
                 <div class="setting-input">
                   <input
                     type="number"
@@ -359,7 +329,7 @@
               </div>
 
               <button id="apply-grid" class="btn btn-primary">
-                <i class="fas fa-sync-alt"></i> Grid anwenden
+                <i class="fas fa-sync-alt"></i> Apply Grid
               </button>
             </div>
           </div>
@@ -367,14 +337,41 @@
           <div class="tools-section">
             <div class="section-title">Export</div>
             <button id="export-svg" class="btn btn-success">
-              <i class="fas fa-file-export"></i> Als SVG exportieren
+              <i class="fas fa-file-export"></i> Export as SVG
             </button>
           </div>
         </div>
 
         <div class="canvas-container">
           <div class="canvas-header">
-            <div class="canvas-title">Design-Bereich</div>
+            <div class="tools-section">
+              <div class="tool-buttons">
+                <button
+                  id="material-tool"
+                  class="tool-btn active"
+                  title="Material hinzufügen"
+                >
+                  <i class="fas fa-square"></i>
+                </button>
+                <button id="eraser-tool" class="tool-btn" title="Radiergummi">
+                  <i class="fas fa-eraser"></i>
+                </button>
+                <button
+                  id="material-swoosh-tool"
+                  class="tool-btn"
+                  title="Material Swoosh"
+                >
+                  <i class="fas fa-paint-roller"></i>
+                </button>
+                <button
+                  id="eraser-swoosh-tool"
+                  class="tool-btn"
+                  title="Radiergummi Swoosh"
+                >
+                  <i class="fas fa-brush"></i>
+                </button>
+              </div>
+            </div>
           </div>
           <div id="canvas-wrapper">
             <canvas id="grid-canvas"></canvas>
@@ -385,7 +382,7 @@
 
     <footer>
       <div class="container">
-        <p>&copy; 2023 PixelCut - Einfache Designs für deinen Lasercutter</p>
+        <p>&copy; 2025 PixelCut - Simple Designs for your Laser Cutter</p>
       </div>
     </footer>
 
