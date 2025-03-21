@@ -664,14 +664,15 @@
 
           // Gefüllte Zellen zeichnen
           ctx.fillStyle = "#2c3e50";
+          const cellBorder = 0;
           for (let y = 0; y < gridHeight; y++) {
             for (let x = 0; x < gridWidth; x++) {
               if (grid[y][x]) {
                 ctx.fillRect(
-                  x * cellSize + 1,
-                  y * cellSize + 1,
-                  cellSize - 2,
-                  cellSize - 2
+                  x * cellSize + cellBorder,
+                  y * cellSize + cellBorder,
+                  cellSize - cellBorder * 2,
+                  cellSize - cellBorder * 2
                 );
               }
             }
