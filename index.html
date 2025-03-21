@@ -268,11 +268,40 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
       }
 
       .canvas-title {
         font-size: 1.2rem;
         font-weight: 600;
+      }
+
+      .header-menu {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+
+      @media (max-width: 767px) {
+        .canvas-header {
+          flex-direction: column;
+          align-items: stretch;
+        }
+
+        .header-menu {
+          justify-content: space-between;
+        }
+
+        .btn-sm {
+          padding: 0.5rem 0.75rem;
+          font-size: 0.85rem;
+        }
+
+        .dropdown-toggle::after {
+          font-size: 0.7rem;
+        }
       }
 
       #canvas-wrapper {
@@ -462,17 +491,6 @@
         justify-content: flex-end;
       }
 
-      .header-menu {
-        display: flex;
-        gap: 0.5rem;
-        align-items: center;
-      }
-
-      .btn-sm {
-        padding: 0.5rem 1rem;
-        font-size: 0.9rem;
-      }
-
       .dropdown {
         position: relative;
         display: inline-block;
@@ -482,7 +500,7 @@
         content: "\f078";
         font-family: "Font Awesome 5 Free";
         font-weight: 900;
-        font-size: 0.8rem;
+        font-size: 0.7rem;
         margin-left: 0.5rem;
       }
 
@@ -519,6 +537,26 @@
       .dropdown-item:hover {
         background-color: #f9f9f9;
       }
+
+      @media (max-width: 767px) {
+        .canvas-header {
+          flex-direction: column;
+          align-items: stretch;
+        }
+
+        .header-menu {
+          justify-content: space-between;
+        }
+
+        .btn-sm {
+          padding: 0.5rem 0.75rem;
+          font-size: 0.85rem;
+        }
+
+        .dropdown-toggle::after {
+          font-size: 0.7rem;
+        }
+      }
     </style>
   </head>
   <body>
@@ -535,8 +573,8 @@
 
     <main class="container">
       <div class="mobile-warning">
-        <i class="fas fa-mobile-alt"></i> Für die beste Erfahrung empfehlen wir
-        die Nutzung auf einem größeren Bildschirm.
+        <i class="fas fa-mobile-alt"></i> For the best experience, we recommend
+        using this tool on a larger screen.
       </div>
 
       <div class="editor-container">
@@ -587,8 +625,12 @@
           </div>
 
           <div class="tools-section">
-            <div class="section-title">Keep Updated</div>
+            <div class="section-title">Stay Updated</div>
             <div class="section-content">
+              <p class="setting-label" style="margin-bottom: 0.5rem">
+                Leave your email and get notified about improvements, bug fixes,
+                and new features.
+              </p>
               <form
                 action="https://formspree.io/f/xaneeblg"
                 method="POST"
