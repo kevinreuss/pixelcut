@@ -375,6 +375,60 @@
         color: #7f8c8d;
         margin-bottom: 0.25rem;
       }
+
+      /* Examples Modal Styles */
+      .examples-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.5rem;
+        margin-bottom: 1.5rem;
+      }
+
+      .example-card {
+        border: 2px solid transparent;
+        border-radius: 8px;
+        overflow: hidden;
+        background-color: white;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        transition: all 0.2s;
+        cursor: pointer;
+      }
+
+      .example-card.selected {
+        border-color: var(--primary);
+        box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
+      }
+
+      .example-preview {
+        width: 100%;
+        height: 180px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background-color: #f9f9f9;
+        padding: 1rem;
+      }
+
+      .example-info {
+        padding: 1rem;
+      }
+
+      .example-info h3 {
+        margin: 0 0 0.5rem 0;
+        font-size: 1.1rem;
+        color: var(--dark);
+      }
+
+      .example-info p {
+        margin: 0;
+        font-size: 0.9rem;
+        color: #7f8c8d;
+      }
+
+      .examples-footer {
+        display: flex;
+        justify-content: flex-end;
+      }
     </style>
   </head>
   <body>
@@ -442,6 +496,13 @@
 
           <div class="tools-section">
             <div class="section-title">Save/Load</div>
+            <button
+              id="load-example"
+              class="btn btn-dark"
+              style="margin-top: 0.5rem"
+            >
+              <i class="fas fa-lightbulb"></i> Load Example
+            </button>
             <button id="download-json" class="btn btn-dark">
               <i class="fas fa-download"></i> Download State
             </button>
@@ -460,13 +521,6 @@
                 style="display: none"
               />
             </div>
-            <button
-              id="load-example"
-              class="btn btn-dark"
-              style="margin-top: 0.5rem"
-            >
-              <i class="fas fa-lightbulb"></i> Load Example
-            </button>
           </div>
 
           <div class="tools-section">
@@ -561,6 +615,11 @@
         <div class="modal-body">
           <div class="examples-grid">
             <!-- Examples will be inserted here by JavaScript -->
+          </div>
+          <div class="examples-footer">
+            <button id="load-selected-example" class="btn btn-primary" disabled>
+              <i class="fas fa-check"></i> Load Selected Example
+            </button>
           </div>
         </div>
       </div>
@@ -1170,14 +1229,24 @@
           const examplesGrid = document.querySelector(".examples-grid");
           examplesGrid.innerHTML = "";
 
+          let selectedExampleIndex = -1;
+          const loadSelectedButton = document.getElementById(
+            "load-selected-example"
+          );
+
           // Examples einfügen
           pixelcutExamples.forEach((example, index) => {
             const exampleCard = document.createElement("div");
             exampleCard.className = "example-card";
+            exampleCard.dataset.index = index;
+
+            // Vorschau-Container erstellen
+            const previewContainer = document.createElement("div");
+            previewContainer.className = "example-preview";
 
             // Vorschau-Canvas erstellen
             const previewCanvas = document.createElement("canvas");
-            previewCanvas.width = 150;
+            previewCanvas.width = 200;
             previewCanvas.height = 150;
             const previewCtx = previewCanvas.getContext("2d");
 
@@ -1192,21 +1261,34 @@
               <p>${example.description}</p>
             `;
 
-            // Load-Button
-            const loadButton = document.createElement("button");
-            loadButton.className = "btn btn-primary load-example-btn";
-            loadButton.innerHTML = "Load";
-            loadButton.dataset.index = index;
-            loadButton.addEventListener("click", function () {
-              loadExample(index);
-              closeExamplesModal();
+            // Klick-Handler für Karte
+            exampleCard.addEventListener("click", function () {
+              // Alle Karten zurücksetzen
+              document.querySelectorAll(".example-card").forEach((card) => {
+                card.classList.remove("selected");
+              });
+
+              // Diese Karte auswählen
+              exampleCard.classList.add("selected");
+              selectedExampleIndex = index;
+
+              // Load-Button aktivieren
+              loadSelectedButton.disabled = false;
             });
 
             // Alles zusammenfügen
-            exampleCard.appendChild(previewCanvas);
+            previewContainer.appendChild(previewCanvas);
+            exampleCard.appendChild(previewContainer);
             exampleCard.appendChild(exampleInfo);
-            exampleCard.appendChild(loadButton);
             examplesGrid.appendChild(exampleCard);
+          });
+
+          // Load-Button Event-Handler
+          loadSelectedButton.addEventListener("click", function () {
+            if (selectedExampleIndex >= 0) {
+              loadExample(selectedExampleIndex);
+              closeExamplesModal();
+            }
           });
 
           // Modal anzeigen
@@ -1247,6 +1329,32 @@
                 );
               }
             }
+          }
+
+          // Optional: Grid-Linien zeichnen
+          ctx.strokeStyle = "#dfe6e9";
+          ctx.lineWidth = 0.5;
+
+          // Vertikale Linien
+          for (let x = 0; x <= example.gridWidth; x++) {
+            ctx.beginPath();
+            ctx.moveTo(offsetX + x * example.cellSize * scale, offsetY);
+            ctx.lineTo(
+              offsetX + x * example.cellSize * scale,
+              offsetY + example.gridHeight * example.cellSize * scale
+            );
+            ctx.stroke();
+          }
+
+          // Horizontale Linien
+          for (let y = 0; y <= example.gridHeight; y++) {
+            ctx.beginPath();
+            ctx.moveTo(offsetX, offsetY + y * example.cellSize * scale);
+            ctx.lineTo(
+              offsetX + example.gridWidth * example.cellSize * scale,
+              offsetY + y * example.cellSize * scale
+            );
+            ctx.stroke();
           }
         }
 
