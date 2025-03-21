@@ -191,6 +191,8 @@
         display: inline-flex;
         align-items: center;
         gap: 0.5rem;
+        width: 100%;
+        justify-content: center;
       }
 
       .btn-primary {
@@ -452,6 +454,53 @@
       <div class="editor-container">
         <div class="tools-panel">
           <div class="tools-section">
+            <div class="section-title">Keep Updated</div>
+            <form
+              action="https://formspree.io/f/xaneeblg"
+              method="POST"
+              class="newsletter-form"
+            >
+              <div class="setting-group">
+                <div class="setting-label">Your E-Mail:</div>
+                <input
+                  type="email"
+                  name="email"
+                  placeholder="email@example.com"
+                  required
+                  style="
+                    width: 100%;
+                    padding: 0.5rem;
+                    border: 1px solid #dfe6e9;
+                    border-radius: 4px;
+                    font-size: 0.9rem;
+                    margin-bottom: 0.5rem;
+                  "
+                />
+              </div>
+              <div class="setting-group">
+                <div class="setting-label">Message (optional):</div>
+                <textarea
+                  name="message"
+                  rows="2"
+                  placeholder="I want to receive updates..."
+                  style="
+                    width: 100%;
+                    padding: 0.5rem;
+                    border: 1px solid #dfe6e9;
+                    border-radius: 4px;
+                    font-size: 0.9rem;
+                    resize: vertical;
+                    margin-bottom: 0.5rem;
+                  "
+                ></textarea>
+              </div>
+              <button type="submit" class="btn btn-primary">
+                <i class="fas fa-paper-plane"></i> Subscribe
+              </button>
+            </form>
+          </div>
+
+          <div class="tools-section">
             <div class="section-title">Grid Settings</div>
             <div class="grid-settings">
               <div class="setting-group">
@@ -506,7 +555,7 @@
             <button id="download-json" class="btn btn-dark">
               <i class="fas fa-download"></i> Download State
             </button>
-            <div style="margin-top: 0.5rem">
+            <div>
               <label
                 for="upload-json"
                 class="btn btn-dark"
