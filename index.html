@@ -1263,8 +1263,8 @@
         // SVG exportieren
         function exportSVG() {
           // Separate Pfade für Material und Engraving erstellen
-          const materialPaths = generateOutlinePaths("material");
-          const engravingPaths = generateOutlinePaths("engraving");
+          const materialPaths = generateOutlinePaths(["material", "engraving"]);
+          const engravingPaths = generateOutlinePaths(["engraving"]);
 
           // Bounding box für alle Elemente berechnen
           let minX = gridWidth * cellSize;
@@ -1305,7 +1305,7 @@
 
           // Engraving-Pfade mit blauer Kontur
           engravingPaths.forEach((path) => {
-            svgContent += `<path d="${path}" fill="none" stroke="blue" stroke-width="1" />`;
+            svgContent += `<path d="${path}" fill="black" stroke="blue" stroke-width="1" />`;
           });
 
           svgContent += "</svg>";
@@ -1313,7 +1313,7 @@
         }
 
         // Umrisspfade generieren
-        function generateOutlinePaths(type) {
+        function generateOutlinePaths(types) {
           // Temporäres Grid erstellen, das um 1 größer ist (für Randprüfung)
           const tempGrid = Array(gridHeight + 2)
             .fill()
@@ -1337,8 +1337,9 @@
             for (let x = 0; x <= gridWidth; x++) {
               // Prüfen, ob hier eine horizontale Linie gezeichnet werden muss
               const cellBelow =
-                y < gridHeight ? tempGrid[y + 1][x + 1] === type : false;
-              const cellAbove = y > 0 ? tempGrid[y][x + 1] === type : false;
+                y < gridHeight ? types.includes(tempGrid[y + 1][x + 1]) : false;
+              const cellAbove =
+                y > 0 ? types.includes(tempGrid[y][x + 1]) : false;
 
               if (cellBelow !== cellAbove) {
                 if (!isDrawing) {
@@ -1372,8 +1373,9 @@
 
             for (let y = 0; y <= gridHeight; y++) {
               const cellRight =
-                x < gridWidth ? tempGrid[y + 1][x + 1] === type : false;
-              const cellLeft = x > 0 ? tempGrid[y + 1][x] === type : false;
+                x < gridWidth ? types.includes(tempGrid[y + 1][x + 1]) : false;
+              const cellLeft =
+                x > 0 ? types.includes(tempGrid[y + 1][x]) : false;
 
               if (cellRight !== cellLeft) {
                 if (!isDrawing) {
