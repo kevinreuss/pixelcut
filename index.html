@@ -1264,7 +1264,7 @@
         function exportSVG() {
           // Separate Pfade für Material und Engraving erstellen
           const materialPaths = generateOutlinePaths(["material", "engraving"]);
-          const engravingPaths = generateOutlinePaths(["engraving"]);
+          const engravingPaths = generateFilledPaths("engraving");
 
           // Bounding box für alle Elemente berechnen
           let minX = gridWidth * cellSize;
@@ -1305,7 +1305,7 @@
 
           // Engraving-Pfade mit blauer Kontur
           engravingPaths.forEach((path) => {
-            svgContent += `<path d="${path}" fill="black" stroke="blue" stroke-width="1" />`;
+            svgContent += `<path d="${path}" fill="black" stroke="none" />`;
           });
 
           svgContent += "</svg>";
@@ -1400,6 +1400,30 @@
 
             if (pathSegments.length > 0) {
               paths.push(pathSegments.join(" "));
+            }
+          }
+
+          return paths;
+        }
+
+        function generateFilledPaths(type) {
+          const paths = [];
+
+          // Finde zusammenhängende Bereiche
+          for (let y = 0; y < gridHeight; y++) {
+            for (let x = 0; x < gridWidth; x++) {
+              if (grid[y][x] === type) {
+                // Wenn wir eine Zelle des gesuchten Typs finden, erstelle einen geschlossenen Pfad
+                let path = `M${x * cellSize},${y * cellSize}`; // Startpunkt
+
+                // Rechteck zeichnen
+                path += ` h${cellSize}`; // Nach rechts
+                path += ` v${cellSize}`; // Nach unten
+                path += ` h${-cellSize}`; // Nach links
+                path += ` z`; // Schließe den Pfad (zurück zum Startpunkt)
+
+                paths.push(path);
+              }
             }
           }
 
