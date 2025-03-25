@@ -1127,7 +1127,10 @@
           // Export-Button in dropdown
           document
             .getElementById("export-svg")
-            .addEventListener("click", exportSVG);
+            .addEventListener("click", function () {
+              const svgContent = exportSVG();
+              downloadSVG(svgContent);
+            });
 
           // Preview-Button in dropdown
           document
