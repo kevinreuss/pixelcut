@@ -963,10 +963,10 @@
           canvas.width = gridWidth * cellSize;
           canvas.height = gridHeight * cellSize;
 
-          // Neues Grid erstellen
+          // Neues Grid erstellen mit "void" als Standardwert
           const newGrid = Array(gridHeight)
             .fill()
-            .map(() => Array(gridWidth).fill(false));
+            .map(() => Array(gridWidth).fill("void"));
 
           // Vorhandene Zeichnung übernehmen
           if (oldGrid.length > 0) {
@@ -974,10 +974,10 @@
             const commonHeight = Math.min(oldGridHeight, gridHeight);
             const commonWidth = Math.min(oldGridWidth, gridWidth);
 
-            // Daten übertragen
+            // Daten übertragen und alte true/false Werte konvertieren
             for (let y = 0; y < commonHeight; y++) {
               for (let x = 0; x < commonWidth; x++) {
-                newGrid[y][x] = oldGrid[y][x];
+                newGrid[y][x] = oldGrid[y][x] === true ? "material" : "void";
               }
             }
           }
@@ -1018,11 +1018,12 @@
           }
 
           // Gefüllte Zellen zeichnen
-          ctx.fillStyle = "#2c3e50";
           const cellBorder = 0;
           for (let y = 0; y < gridHeight; y++) {
             for (let x = 0; x < gridWidth; x++) {
-              if (grid[y][x]) {
+              if (grid[y][x] === "material" || grid[y][x] === "engraving") {
+                ctx.fillStyle =
+                  grid[y][x] === "material" ? "#2c3e50" : "#e74c3c";
                 ctx.fillRect(
                   x * cellSize + cellBorder,
                   y * cellSize + cellBorder,
@@ -1178,10 +1179,13 @@
           // Zelle je nach Werkzeug aktualisieren
           switch (activeTool) {
             case "material":
-              grid[y][x] = true;
+              grid[y][x] = "material";
+              break;
+            case "engraving":
+              grid[y][x] = "engraving";
               break;
             case "eraser":
-              grid[y][x] = false;
+              grid[y][x] = "void";
               break;
           }
 
@@ -1194,19 +1198,20 @@
 
         // SVG exportieren
         function exportSVG() {
-          // Pfade für die Außenkanten aller gefüllten Zellen erstellen
-          const paths = generateOutlinePaths();
+          // Separate Pfade für Material und Engraving erstellen
+          const materialPaths = generateOutlinePaths("material");
+          const engravingPaths = generateOutlinePaths("engraving");
 
-          // Bounding box berechnen
+          // Bounding box für alle Elemente berechnen
           let minX = gridWidth * cellSize;
           let minY = gridHeight * cellSize;
           let maxX = 0;
           let maxY = 0;
 
-          // Durch alle gefüllten Zellen iterieren, um die tatsächlichen Grenzen zu finden
+          // Durch alle Zellen iterieren
           for (let y = 0; y < gridHeight; y++) {
             for (let x = 0; x < gridWidth; x++) {
-              if (grid[y][x]) {
+              if (grid[y][x] !== "void") {
                 minX = Math.min(minX, x * cellSize);
                 minY = Math.min(minY, y * cellSize);
                 maxX = Math.max(maxX, (x + 1) * cellSize);
@@ -1226,63 +1231,118 @@
           const svgWidth = maxX - minX;
           const svgHeight = maxY - minY;
 
-          // SVG erstellen mit viewBox, um den Inhalt zu zentrieren
+          // SVG erstellen mit viewBox
           let svgContent = `<svg width="${svgWidth}" height="${svgHeight}" viewBox="${minX} ${minY} ${svgWidth} ${svgHeight}" xmlns="http://www.w3.org/2000/svg">`;
 
-          // Pfade mit roter Kontur und ohne Füllung
-          paths.forEach((path) => {
+          // Material-Pfade mit roter Kontur
+          materialPaths.forEach((path) => {
             svgContent += `<path d="${path}" fill="none" stroke="red" stroke-width="1" />`;
           });
 
-          svgContent += "</svg>";
+          // Engraving-Pfade mit blauer Kontur
+          engravingPaths.forEach((path) => {
+            svgContent += `<path d="${path}" fill="none" stroke="blue" stroke-width="1" />`;
+          });
 
-          // SVG herunterladen
-          downloadSVG(svgContent);
+          svgContent += "</svg>";
+          return svgContent;
+        }
+
+        // Umrisspfade generieren
+        function generateOutlinePaths(type) {
+          // Temporäres Grid erstellen, das um 1 größer ist (für Randprüfung)
+          const tempGrid = Array(gridHeight + 2)
+            .fill()
+            .map(() => Array(gridWidth + 2).fill("void"));
+
+          // Daten aus dem eigentlichen Grid kopieren
+          for (let y = 0; y < gridHeight; y++) {
+            for (let x = 0; x < gridWidth; x++) {
+              tempGrid[y + 1][x + 1] = grid[y][x];
+            }
+          }
+
+          const paths = [];
+
+          // Horizontale Linien finden
+          for (let y = 0; y <= gridHeight; y++) {
+            let pathSegments = [];
+            let isDrawing = false;
+            let startX = 0;
+
+            for (let x = 0; x <= gridWidth; x++) {
+              // Prüfen, ob hier eine horizontale Linie gezeichnet werden muss
+              const cellBelow =
+                y < gridHeight ? tempGrid[y + 1][x + 1] === type : false;
+              const cellAbove = y > 0 ? tempGrid[y][x + 1] === type : false;
+
+              if (cellBelow !== cellAbove) {
+                if (!isDrawing) {
+                  isDrawing = true;
+                  startX = x;
+                }
+              } else if (isDrawing) {
+                pathSegments.push(
+                  `M${startX * cellSize},${y * cellSize} H${x * cellSize}`
+                );
+                isDrawing = false;
+              }
+            }
+
+            if (isDrawing) {
+              pathSegments.push(
+                `M${startX * cellSize},${y * cellSize} H${gridWidth * cellSize}`
+              );
+            }
+
+            if (pathSegments.length > 0) {
+              paths.push(pathSegments.join(" "));
+            }
+          }
+
+          // Vertikale Linien finden
+          for (let x = 0; x <= gridWidth; x++) {
+            let pathSegments = [];
+            let isDrawing = false;
+            let startY = 0;
+
+            for (let y = 0; y <= gridHeight; y++) {
+              const cellRight =
+                x < gridWidth ? tempGrid[y + 1][x + 1] === type : false;
+              const cellLeft = x > 0 ? tempGrid[y + 1][x] === type : false;
+
+              if (cellRight !== cellLeft) {
+                if (!isDrawing) {
+                  isDrawing = true;
+                  startY = y;
+                }
+              } else if (isDrawing) {
+                pathSegments.push(
+                  `M${x * cellSize},${startY * cellSize} V${y * cellSize}`
+                );
+                isDrawing = false;
+              }
+            }
+
+            if (isDrawing) {
+              pathSegments.push(
+                `M${x * cellSize},${startY * cellSize} V${
+                  gridHeight * cellSize
+                }`
+              );
+            }
+
+            if (pathSegments.length > 0) {
+              paths.push(pathSegments.join(" "));
+            }
+          }
+
+          return paths;
         }
 
         // SVG Vorschau anzeigen
         function previewSVG() {
-          // Pfade für die Außenkanten aller gefüllten Zellen erstellen
-          const paths = generateOutlinePaths();
-
-          // Bounding box berechnen
-          let minX = gridWidth * cellSize;
-          let minY = gridHeight * cellSize;
-          let maxX = 0;
-          let maxY = 0;
-
-          // Durch alle gefüllten Zellen iterieren, um die tatsächlichen Grenzen zu finden
-          for (let y = 0; y < gridHeight; y++) {
-            for (let x = 0; x < gridWidth; x++) {
-              if (grid[y][x]) {
-                minX = Math.min(minX, x * cellSize);
-                minY = Math.min(minY, y * cellSize);
-                maxX = Math.max(maxX, (x + 1) * cellSize);
-                maxY = Math.max(maxY, (y + 1) * cellSize);
-              }
-            }
-          }
-
-          // Padding hinzufügen (5px auf jeder Seite)
-          const padding = 5;
-          minX = Math.max(0, minX - padding);
-          minY = Math.max(0, minY - padding);
-          maxX = Math.min(gridWidth * cellSize, maxX + padding);
-          maxY = Math.min(gridHeight * cellSize, maxY + padding);
-
-          // SVG-Dimensionen berechnen
-          const svgWidth = maxX - minX;
-          const svgHeight = maxY - minY;
-
-          // SVG erstellen mit viewBox, um den Inhalt zu zentrieren
-          let svgContent = `<svg width="${svgWidth}" height="${svgHeight}" viewBox="${minX} ${minY} ${svgWidth} ${svgHeight}" xmlns="http://www.w3.org/2000/svg">`;
-
-          // Pfade mit roter Kontur und ohne Füllung
-          paths.forEach((path) => {
-            svgContent += `<path d="${path}" fill="none" stroke="red" stroke-width="1" />`;
-          });
-
-          svgContent += "</svg>";
+          const svgContent = exportSVG();
 
           // SVG in Container einfügen
           const previewContainer = document.getElementById(
@@ -1315,105 +1375,6 @@
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
           }, 0);
-        }
-
-        // Umrisspfade generieren
-        function generateOutlinePaths() {
-          // Temporäres Grid erstellen, das um 1 größer ist (für Randprüfung)
-          const tempGrid = Array(gridHeight + 2)
-            .fill()
-            .map(() => Array(gridWidth + 2).fill(false));
-
-          // Daten aus dem eigentlichen Grid kopieren
-          for (let y = 0; y < gridHeight; y++) {
-            for (let x = 0; x < gridWidth; x++) {
-              tempGrid[y + 1][x + 1] = grid[y][x];
-            }
-          }
-
-          const paths = [];
-
-          // Horizontale Linien finden
-          for (let y = 0; y <= gridHeight; y++) {
-            let pathSegments = [];
-            let isDrawing = false;
-            let startX = 0;
-
-            for (let x = 0; x <= gridWidth; x++) {
-              // Prüfen, ob hier eine horizontale Linie gezeichnet werden muss
-              // (wenn eine Zelle gefüllt ist und die darüber nicht, oder umgekehrt)
-              const cellBelow = y < gridHeight ? tempGrid[y + 1][x + 1] : false;
-              const cellAbove = y > 0 ? tempGrid[y][x + 1] : false;
-
-              if (cellBelow !== cellAbove) {
-                // Linie beginnen oder fortsetzen
-                if (!isDrawing) {
-                  isDrawing = true;
-                  startX = x;
-                }
-              } else if (isDrawing) {
-                // Linie beenden
-                pathSegments.push(
-                  `M${startX * cellSize},${y * cellSize} H${x * cellSize}`
-                );
-                isDrawing = false;
-              }
-            }
-
-            // Letzte Linie in der Zeile beenden, falls nötig
-            if (isDrawing) {
-              pathSegments.push(
-                `M${startX * cellSize},${y * cellSize} H${gridWidth * cellSize}`
-              );
-            }
-
-            if (pathSegments.length > 0) {
-              paths.push(pathSegments.join(" "));
-            }
-          }
-
-          // Vertikale Linien finden
-          for (let x = 0; x <= gridWidth; x++) {
-            let pathSegments = [];
-            let isDrawing = false;
-            let startY = 0;
-
-            for (let y = 0; y <= gridHeight; y++) {
-              // Prüfen, ob hier eine vertikale Linie gezeichnet werden muss
-              // (wenn eine Zelle gefüllt ist und die links davon nicht, oder umgekehrt)
-              const cellRight = x < gridWidth ? tempGrid[y + 1][x + 1] : false;
-              const cellLeft = x > 0 ? tempGrid[y + 1][x] : false;
-
-              if (cellRight !== cellLeft) {
-                // Linie beginnen oder fortsetzen
-                if (!isDrawing) {
-                  isDrawing = true;
-                  startY = y;
-                }
-              } else if (isDrawing) {
-                // Linie beenden
-                pathSegments.push(
-                  `M${x * cellSize},${startY * cellSize} V${y * cellSize}`
-                );
-                isDrawing = false;
-              }
-            }
-
-            // Letzte Linie in der Spalte beenden, falls nötig
-            if (isDrawing) {
-              pathSegments.push(
-                `M${x * cellSize},${startY * cellSize} V${
-                  gridHeight * cellSize
-                }`
-              );
-            }
-
-            if (pathSegments.length > 0) {
-              paths.push(pathSegments.join(" "));
-            }
-          }
-
-          return paths;
         }
 
         // Zustand als JSON herunterladen
@@ -1586,10 +1547,11 @@
             (previewHeight - example.gridHeight * example.cellSize * scale) / 2;
 
           // Grid zeichnen
-          ctx.fillStyle = "#2c3e50";
           for (let y = 0; y < example.gridHeight; y++) {
             for (let x = 0; x < example.gridWidth; x++) {
-              if (example.grid[y][x]) {
+              if (example.grid[y][x] !== "void") {
+                ctx.fillStyle =
+                  example.grid[y][x] === "material" ? "#2c3e50" : "#e74c3c";
                 ctx.fillRect(
                   offsetX + x * example.cellSize * scale,
                   offsetY + y * example.cellSize * scale,
@@ -1600,7 +1562,7 @@
             }
           }
 
-          // Optional: Grid-Linien zeichnen
+          // Grid-Linien zeichnen
           ctx.strokeStyle = "#dfe6e9";
           ctx.lineWidth = 0.5;
 
