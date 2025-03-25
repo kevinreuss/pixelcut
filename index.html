@@ -1040,10 +1040,11 @@
             const commonHeight = Math.min(oldGridHeight, gridHeight);
             const commonWidth = Math.min(oldGridWidth, gridWidth);
 
-            // Daten übertragen und alte true/false Werte konvertieren
+            // Daten übertragen und Werte beibehalten
             for (let y = 0; y < commonHeight; y++) {
               for (let x = 0; x < commonWidth; x++) {
-                newGrid[y][x] = oldGrid[y][x] === true ? "material" : "void";
+                // Direkt den Wert übernehmen (material, engraving oder void)
+                newGrid[y][x] = oldGrid[y][x];
               }
             }
           }
