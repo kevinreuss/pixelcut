@@ -702,35 +702,16 @@
             <div class="tools-section">
               <div class="tool-groups">
                 <div class="tool-group">
-                  <div class="tool-group-title">Single Cell Tools:</div>
+                  <div class="tool-group-title">Drawing Tools:</div>
                   <div class="tool-buttons">
                     <button
                       id="material-tool"
                       class="tool-btn active"
-                      title="Add Material"
+                      title="Material"
                     >
                       <i class="fas fa-square"></i>
                     </button>
                     <button id="eraser-tool" class="tool-btn" title="Eraser">
-                      <i class="fas fa-eraser"></i>
-                    </button>
-                  </div>
-                </div>
-                <div class="tool-group">
-                  <div class="tool-group-title">Multi Cell Tools:</div>
-                  <div class="tool-buttons">
-                    <button
-                      id="material-swoosh-tool"
-                      class="tool-btn"
-                      title="Material Swoosh"
-                    >
-                      <i class="fas fa-square"></i>
-                    </button>
-                    <button
-                      id="eraser-swoosh-tool"
-                      class="tool-btn"
-                      title="Eraser Swoosh"
-                    >
                       <i class="fas fa-eraser"></i>
                     </button>
                   </div>
@@ -893,8 +874,6 @@
         const tools = {
           material: document.getElementById("material-tool"),
           eraser: document.getElementById("eraser-tool"),
-          materialSwoosh: document.getElementById("material-swoosh-tool"),
-          eraserSwoosh: document.getElementById("eraser-swoosh-tool"),
         };
 
         let activeTool = "material";
@@ -1147,25 +1126,13 @@
           isDrawing = true;
           const { x, y } = getCellCoordinates(e);
           updateCell(x, y);
-
-          // Bei Einzel-Tools sofort das Zeichnen beenden
-          if (activeTool === "material" || activeTool === "eraser") {
-            isDrawing = false;
-          }
         }
 
         // Zeichnen
         function draw(e) {
           if (!isDrawing) return;
-
-          // Nur bei Swoosh-Tools weitermachen
-          if (
-            activeTool === "materialSwoosh" ||
-            activeTool === "eraserSwoosh"
-          ) {
-            const { x, y } = getCellCoordinates(e);
-            updateCell(x, y);
-          }
+          const { x, y } = getCellCoordinates(e);
+          updateCell(x, y);
         }
 
         // Zeichnen beenden
@@ -1211,11 +1178,9 @@
           // Zelle je nach Werkzeug aktualisieren
           switch (activeTool) {
             case "material":
-            case "materialSwoosh":
               grid[y][x] = true;
               break;
             case "eraser":
-            case "eraserSwoosh":
               grid[y][x] = false;
               break;
           }
