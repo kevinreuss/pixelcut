@@ -1408,26 +1408,122 @@
 
         function generateFilledPaths(type) {
           const paths = [];
+          const visited = Array(gridHeight)
+            .fill()
+            .map(() => Array(gridWidth).fill(false));
 
-          // Finde zusammenhängende Bereiche
+          // Hilfsfunktion zum Finden zusammenhängender Bereiche
+          function findConnectedArea(startX, startY) {
+            const area = [];
+            const queue = [{ x: startX, y: startY }];
+
+            while (queue.length > 0) {
+              const { x, y } = queue.shift();
+
+              if (
+                x < 0 ||
+                x >= gridWidth ||
+                y < 0 ||
+                y >= gridHeight ||
+                visited[y][x] ||
+                grid[y][x] !== type
+              ) {
+                continue;
+              }
+
+              visited[y][x] = true;
+              area.push({ x, y });
+
+              // Nachbarzellen zur Queue hinzufügen
+              queue.push({ x: x + 1, y: y }); // rechts
+              queue.push({ x: x - 1, y: y }); // links
+              queue.push({ x: x, y: y + 1 }); // unten
+              queue.push({ x: x, y: y - 1 }); // oben
+            }
+
+            return area;
+          }
+
+          // Durch alle Zellen iterieren
           for (let y = 0; y < gridHeight; y++) {
             for (let x = 0; x < gridWidth; x++) {
-              if (grid[y][x] === type) {
-                // Wenn wir eine Zelle des gesuchten Typs finden, erstelle einen geschlossenen Pfad
-                let path = `M${x * cellSize},${y * cellSize}`; // Startpunkt
-
-                // Rechteck zeichnen
-                path += ` h${cellSize}`; // Nach rechts
-                path += ` v${cellSize}`; // Nach unten
-                path += ` h${-cellSize}`; // Nach links
-                path += ` z`; // Schließe den Pfad (zurück zum Startpunkt)
-
-                paths.push(path);
+              if (!visited[y][x] && grid[y][x] === type) {
+                const area = findConnectedArea(x, y);
+                if (area.length > 0) {
+                  // Kontur der zusammenhängenden Fläche erstellen
+                  const path = generatePathForArea(area);
+                  paths.push(path);
+                }
               }
             }
           }
 
           return paths;
+        }
+
+        // Hilfsfunktion zum Generieren des SVG-Pfads für eine Fläche
+        function generatePathForArea(area) {
+          // Rechtecke finden und zusammenfassen
+          const rectangles = findRectangles(area);
+
+          // SVG-Pfad für alle Rechtecke erstellen
+          return rectangles
+            .map((rect) => {
+              const { x, y, width, height } = rect;
+              return (
+                `M${x * cellSize},${y * cellSize}` +
+                `h${width * cellSize}` +
+                `v${height * cellSize}` +
+                `h${-width * cellSize}` +
+                "z"
+              );
+            })
+            .join(" ");
+        }
+
+        // Hilfsfunktion zum Finden optimaler Rechtecke
+        function findRectangles(area) {
+          const rectangles = [];
+          const remaining = new Set(area.map((p) => `${p.x},${p.y}`));
+
+          while (remaining.size > 0) {
+            // Startpunkt für neues Rechteck finden
+            const [startX, startY] = remaining
+              .values()
+              .next()
+              .value.split(",")
+              .map(Number);
+
+            // Maximale Breite und Höhe des Rechtecks finden
+            let width = 0;
+            let height = 0;
+
+            // Breite ermitteln
+            while (remaining.has(`${startX + width},${startY}`)) {
+              width++;
+            }
+
+            // Höhe ermitteln
+            outer: for (height = 1; ; height++) {
+              // Prüfen ob die nächste Zeile komplett verfügbar ist
+              for (let x = 0; x < width; x++) {
+                if (!remaining.has(`${startX + x},${startY + height}`)) {
+                  break outer;
+                }
+              }
+            }
+
+            // Rechteck aus remaining entfernen
+            for (let y = 0; y < height; y++) {
+              for (let x = 0; x < width; x++) {
+                remaining.delete(`${startX + x},${startY + y}`);
+              }
+            }
+
+            rectangles.push({ x: startX, y: startY, width, height });
+          }
+
+          return rectangles;
         }
 
         // SVG Vorschau anzeigen
