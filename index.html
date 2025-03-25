@@ -707,16 +707,16 @@
                     <button
                       id="material-tool"
                       class="tool-btn active"
-                      title="Material"
+                      title="Material (Cut)"
                     >
-                      <i class="fas fa-square"></i>
+                      <i class="fas fa-scissors"></i>
                     </button>
                     <button
                       id="engraving-tool"
                       class="tool-btn"
                       title="Engraving"
                     >
-                      <i class="fas fa-pen"></i>
+                      <i class="fas fa-fire"></i>
                     </button>
                     <button id="eraser-tool" class="tool-btn" title="Eraser">
                       <i class="fas fa-eraser"></i>
@@ -887,6 +887,64 @@
         let activeTool = "material";
         let isDrawing = false;
 
+        // Holztexturen erstellen
+        const woodPattern = document.createElement("canvas");
+        const engravingPattern = document.createElement("canvas");
+
+        function createWoodPattern() {
+          woodPattern.width = cellSize;
+          woodPattern.height = cellSize;
+          const wctx = woodPattern.getContext("2d");
+
+          // Grundfarbe (helles Holz)
+          wctx.fillStyle = "#deb887";
+          wctx.fillRect(0, 0, cellSize, cellSize);
+
+          // Maserung hinzufügen
+          wctx.strokeStyle = "#d2691e";
+          wctx.globalAlpha = 0.1;
+          for (let i = 0; i < 5; i++) {
+            wctx.beginPath();
+            wctx.moveTo(0, Math.random() * cellSize);
+            wctx.bezierCurveTo(
+              cellSize / 3,
+              Math.random() * cellSize,
+              (2 * cellSize) / 3,
+              Math.random() * cellSize,
+              cellSize,
+              Math.random() * cellSize
+            );
+            wctx.stroke();
+          }
+        }
+
+        function createEngravingPattern() {
+          engravingPattern.width = cellSize;
+          engravingPattern.height = cellSize;
+          const ectx = engravingPattern.getContext("2d");
+
+          // Dunklere Grundfarbe
+          ectx.fillStyle = "#8b4513";
+          ectx.fillRect(0, 0, cellSize, cellSize);
+
+          // Verbrannte Struktur
+          ectx.strokeStyle = "#000000";
+          ectx.globalAlpha = 0.2;
+
+          // Kreuzschraffur
+          for (let i = 0; i < cellSize; i += 3) {
+            ectx.beginPath();
+            ectx.moveTo(0, i);
+            ectx.lineTo(cellSize, i);
+            ectx.stroke();
+
+            ectx.beginPath();
+            ectx.moveTo(i, 0);
+            ectx.lineTo(i, cellSize);
+            ectx.stroke();
+          }
+        }
+
         // Aus localStorage laden, falls vorhanden
         function loadFromLocalStorage() {
           const savedState = localStorage.getItem("pixelcutState");
@@ -1002,6 +1060,10 @@
 
         // Grid zeichnen
         function drawGrid() {
+          // Texturen bei Größenänderung neu erstellen
+          createWoodPattern();
+          createEngravingPattern();
+
           // Canvas löschen
           ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -1026,18 +1088,12 @@
           }
 
           // Gefüllte Zellen zeichnen
-          const cellBorder = 0;
           for (let y = 0; y < gridHeight; y++) {
             for (let x = 0; x < gridWidth; x++) {
-              if (grid[y][x] === "material" || grid[y][x] === "engraving") {
-                ctx.fillStyle =
-                  grid[y][x] === "material" ? "#2c3e50" : "#e74c3c";
-                ctx.fillRect(
-                  x * cellSize + cellBorder,
-                  y * cellSize + cellBorder,
-                  cellSize - cellBorder * 2,
-                  cellSize - cellBorder * 2
-                );
+              if (grid[y][x] === "material") {
+                ctx.drawImage(woodPattern, x * cellSize, y * cellSize);
+              } else if (grid[y][x] === "engraving") {
+                ctx.drawImage(engravingPattern, x * cellSize, y * cellSize);
               }
             }
           }
@@ -1557,9 +1613,16 @@
           // Grid zeichnen
           for (let y = 0; y < example.gridHeight; y++) {
             for (let x = 0; x < example.gridWidth; x++) {
-              if (example.grid[y][x] !== "void") {
-                ctx.fillStyle =
-                  example.grid[y][x] === "material" ? "#2c3e50" : "#e74c3c";
+              if (example.grid[y][x] === "material") {
+                ctx.fillStyle = "#deb887"; // Helles Holz
+                ctx.fillRect(
+                  offsetX + x * example.cellSize * scale,
+                  offsetY + y * example.cellSize * scale,
+                  example.cellSize * scale,
+                  example.cellSize * scale
+                );
+              } else if (example.grid[y][x] === "engraving") {
+                ctx.fillStyle = "#8b4513"; // Dunkles Holz
                 ctx.fillRect(
                   offsetX + x * example.cellSize * scale,
                   offsetY + y * example.cellSize * scale,
